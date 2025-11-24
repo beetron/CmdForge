@@ -1,5 +1,6 @@
 appId: com.electron.app
 productName: cmdforge
+icon: build/icon
 directories:
   buildResources: build
 files:
@@ -13,6 +14,7 @@ asarUnpack:
   - resources/**
 win:
   executableName: cmdforge
+  icon: build/icon.ico
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
@@ -26,6 +28,7 @@ mac:
     - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
   notarize: false
+  icon: build/icon.icns
 dmg:
   artifactName: ${name}-${version}.${ext}
 linux:

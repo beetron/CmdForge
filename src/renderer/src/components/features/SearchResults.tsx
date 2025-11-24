@@ -6,13 +6,15 @@ interface SearchResultsProps {
   copiedId: number | null
   onCopy: (text: string, id: number) => void
   onEdit: (cmd: Command) => void
+  onDelete: (id: number) => void
 }
 
 export const SearchResults: React.FC<SearchResultsProps> = ({
   suggestions,
   copiedId,
   onCopy,
-  onEdit
+  onEdit,
+  onDelete
 }) => {
   if (suggestions.length === 0) return null
 
@@ -30,7 +32,10 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
           >
             <div className="suggestion-content">
               <div className="suggestion-command">{cmd.command}</div>
-              {cmd.description && <div className="suggestion-description">{cmd.description}</div>}
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 6 }}>
+                {cmd.groupName && <span className="command-group">{cmd.groupName}</span>}
+                {cmd.description && <div className="suggestion-description">{cmd.description}</div>}
+              </div>
             </div>
             <div className="suggestion-actions">
               {copiedId === cmd.id && <span className="copied-indicator">✓ Copied!</span>}
@@ -42,6 +47,15 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                 }}
               >
                 Edit
+              </button>
+              <button
+                className="btn-delete suggestion-edit-btn"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onDelete(cmd.id!)
+                }}
+              >
+                Delete
               </button>
             </div>
           </div>

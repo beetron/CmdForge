@@ -38,5 +38,12 @@ export const commandService = {
 
   async importData(): Promise<ImportResult> {
     return window.api.importData()
+  },
+
+  async renameGroup(oldName: string, newName: string): Promise<{ ok: boolean; message?: string }> {
+    return window.api.renameGroup(oldName, newName)
+  },
+  async deleteGroup(groupName: string): Promise<{ ok: boolean; message?: string }> {
+    return window.api.deleteGroup(groupName)
   }
 }

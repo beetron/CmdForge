@@ -1,18 +1,63 @@
-import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, dialog, nativeImage } from 'electron'
+import fs from 'fs'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import icon from '../../resources/icon.png?asset'
-import fs from 'fs'
+// Resolve the app icon path in a way that works both for development and for packaged builds.
+// - In development, we use the project's resources directory
+// - In packaged builds, assets may be unpacked under process.resourcesPath/app.asar.unpacked/resources
+// We prefer an ICO on Windows if available (exe icon is embedded by the packager), otherwise fall
+// back to PNG if present in the unpacked resources. The BrowserWindow will use the executable
+// icon on Windows if no icon is provided.
+function resolveAppIcon(): string | undefined {
+  try {
+    const devPng = join(__dirname, '../../resources/icon.png')
+    const devIco = join(__dirname, '../../resources/icon.ico')
+    const devIcns = join(__dirname, '../../build/icon.icns')
+    const packagedIco = join(process.resourcesPath, 'icon.ico')
+    const packagedUnpackedIco = join(
+      process.resourcesPath,
+      'app.asar.unpacked',
+      'resources',
+      'icon.ico'
+    )
+    const packagedIcns = join(process.resourcesPath, 'icon.icns')
+    const packagedUnpackedIcns = join(
+      process.resourcesPath,
+      'app.asar.unpacked',
+      'resources',
+      'icon.icns'
+    )
+    const packagedUnpackedPng = join(
+      process.resourcesPath,
+      'app.asar.unpacked',
+      'resources',
+      'icon.png'
+    )
 
-let Database: any = null
-try {
-  // Try to import better-sqlite3 if available. This may fail on some systems without
-  // native build toolchain; we'll handle that below and fallback to JSON storage.
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  Database = require('better-sqlite3')
-} catch (err) {
-  // ignore - we'll use JSON fallback
+    if (is.dev) {
+      // Prefer ico, then icns, then png in dev
+      if (fs.existsSync(devIco)) return devIco
+      if (fs.existsSync(devIcns)) return devIcns
+      if (fs.existsSync(devPng)) return devPng
+      return undefined
+    }
+
+    if (fs.existsSync(packagedIco)) return packagedIco
+    if (fs.existsSync(packagedIcns)) return packagedIcns
+    if (fs.existsSync(packagedUnpackedIco)) return packagedUnpackedIco
+    if (fs.existsSync(packagedUnpackedIcns)) return packagedUnpackedIcns
+    if (fs.existsSync(packagedUnpackedPng)) return packagedUnpackedPng
+    return undefined
+  } catch {
+    return undefined
+  }
 }
+
+const iconPath = resolveAppIcon()
+const icon = iconPath ? nativeImage.createFromPath(iconPath) : undefined
+
+let Database: unknown = null
+let mainWindowRef: BrowserWindow | null = null
 
 function createWindow(): void {
   // Create the browser window with rounded corners
@@ -65,9 +110,18 @@ function createWindow(): void {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+  mainWindowRef = mainWindow
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  // Dynamically import better-sqlite3 if available at runtime (optional dependency)
+  try {
+    const dbModule = await import('better-sqlite3')
+    Database = (dbModule as unknown as { default?: unknown }).default ?? (dbModule as unknown)
+  } catch {
+    // Not available - staying with JSON fallback
+  }
+
   electronApp.setAppUserModelId('com.electron')
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
@@ -85,8 +139,20 @@ app.whenReady().then(() => {
     let useSqlite = false
     if (Database) {
       try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const db = new (Database as any)(dbPath)
+        type PreparedStatement = {
+          run: (...args: unknown[]) => { lastInsertRowid?: number }
+          get: (...args: unknown[]) => unknown
+          all: (...args: unknown[]) => unknown[]
+        }
+
+        type BetterSqlite3Ctor = new (filename: string) => {
+          pragma: (s: string) => unknown
+          prepare: (sql: string) => PreparedStatement
+          transaction: <T extends (...args: unknown[]) => unknown>(fn: T) => T
+        }
+
+        const DBConstructor = Database as unknown as BetterSqlite3Ctor
+        const db = new DBConstructor(dbPath)
         useSqlite = true
         db.pragma('journal_mode = WAL')
 
@@ -107,8 +173,12 @@ app.whenReady().then(() => {
           (_, payload: { command: string; description?: string; groupName?: string }) => {
             const info = db
               .prepare('INSERT INTO commands (command, description, groupName) VALUES (?, ?, ?)')
-              .run(payload.command, payload.description || '', payload.groupName || '')
-            return db.prepare('SELECT * FROM commands WHERE id = ?').get(info.lastInsertRowid)
+              .run(payload.command, payload.description || '', payload.groupName || '') as {
+              lastInsertRowid?: number
+            }
+            return db
+              .prepare('SELECT * FROM commands WHERE id = ?')
+              .get(info.lastInsertRowid as number)
           }
         )
 
@@ -156,8 +226,41 @@ app.whenReady().then(() => {
               'SELECT DISTINCT groupName FROM commands WHERE groupName IS NOT NULL ORDER BY groupName'
             )
             .all()
-            .map((r: { groupName: string }) => r.groupName)
+            .map((r: unknown) => (r as { groupName: string }).groupName)
         )
+
+        ipcMain.handle('db-rename-group', async (_, oldName: string, newName: string) => {
+          if (!oldName || !newName || oldName === newName) return { ok: false, message: 'No-op' }
+          try {
+            const exists = db
+              .prepare('SELECT 1 FROM commands WHERE groupName = ? LIMIT 1')
+              .get(newName)
+            if (exists) return { ok: false, message: 'Group name already in use' }
+            db.prepare('UPDATE commands SET groupName = ? WHERE groupName = ?').run(
+              newName,
+              oldName
+            )
+            return { ok: true }
+          } catch (err) {
+            console.error('db-rename-group sqlite error', err)
+            return { ok: false, message: 'Failed to rename group' }
+          }
+        })
+
+        ipcMain.handle('db-delete-group', async (_, groupName: string) => {
+          if (!groupName) return { ok: false, message: 'Missing group name' }
+          try {
+            const exists = db
+              .prepare('SELECT 1 FROM commands WHERE groupName = ? LIMIT 1')
+              .get(groupName)
+            if (!exists) return { ok: false, message: 'Group not found' }
+            db.prepare('DELETE FROM commands WHERE groupName = ?').run(groupName)
+            return { ok: true }
+          } catch (err) {
+            console.error('db-delete-group sqlite error', err)
+            return { ok: false, message: 'Failed to delete group' }
+          }
+        })
 
         ipcMain.handle('db-export', async () => {
           const rows = db.prepare('SELECT * FROM commands ORDER BY created_at DESC').all()
@@ -192,12 +295,17 @@ app.whenReady().then(() => {
           const insert = db.prepare(
             'INSERT INTO commands (command, description, groupName) VALUES (?, ?, ?)'
           )
-          const insertMany = db.transaction(
-            (items: Array<{ command: string; description?: string; groupName?: string }>) => {
-              for (const it of items)
-                insert.run(it.command, it.description || '', it.groupName || '')
-            }
-          )
+          const insertMany = (
+            db.transaction as unknown as (
+              fn: (
+                items: Array<{ command: string; description?: string; groupName?: string }>
+              ) => void
+            ) => (
+              items: Array<{ command: string; description?: string; groupName?: string }>
+            ) => void
+          )((items) => {
+            for (const it of items) insert.run(it.command, it.description || '', it.groupName || '')
+          })
           insertMany(parsed)
           return { cancelled: false, count: parsed.length }
         })
@@ -337,6 +445,52 @@ app.whenReady().then(() => {
         writeAll(newRows)
         return { cancelled: false, count: parsed.length }
       })
+
+      // JSON fallback rename group implementation
+      ipcMain.handle('db-rename-group', async (_, oldName: string, newName: string) => {
+        if (!oldName || !newName || oldName === newName) return { ok: false, message: 'No-op' }
+        try {
+          const rows = readAll()
+          // Check for conflicts where a group already uses the new name
+          const exists = rows.some(
+            (r: unknown) => (r as { groupName?: string }).groupName === newName
+          )
+          if (exists) return { ok: false, message: 'Group name already in use' }
+          let changed = false
+          const newRows = rows.map((r: unknown) => {
+            const rr = r as { groupName?: string }
+            if (rr.groupName === oldName) {
+              changed = true
+              return { ...(r as Record<string, unknown>), groupName: newName }
+            }
+            return r
+          })
+          if (changed) writeAll(newRows)
+          return { ok: true }
+        } catch (err) {
+          console.error('db-rename-group json error', err)
+          return { ok: false, message: 'Failed to rename group' }
+        }
+      })
+
+      ipcMain.handle('db-delete-group', async (_, groupName: string) => {
+        if (!groupName) return { ok: false, message: 'Missing group name' }
+        try {
+          const rows = readAll()
+          const exists = rows.some(
+            (r: unknown) => (r as { groupName?: string }).groupName === groupName
+          )
+          if (!exists) return { ok: false, message: 'Group not found' }
+          const newRows = rows.filter(
+            (r: unknown) => (r as { groupName?: string }).groupName !== groupName
+          )
+          writeAll(newRows)
+          return { ok: true }
+        } catch (err) {
+          console.error('db-delete-group json error', err)
+          return { ok: false, message: 'Failed to delete group' }
+        }
+      })
     }
   } catch (err) {
     console.error('DB init error', err)
@@ -344,9 +498,41 @@ app.whenReady().then(() => {
 
   createWindow()
 
+  // Set macOS Dock icon explicitly when available
+  if (process.platform === 'darwin' && icon) {
+    try {
+      app.dock.setIcon(icon)
+    } catch (err) {
+      console.warn('set Dock icon error', err)
+    }
+  }
+
   app.on('activate', function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
+})
+
+// Handle set-always-on-top
+ipcMain.handle('set-always-on-top', (_, enabled: boolean) => {
+  try {
+    const win = mainWindowRef || BrowserWindow.getAllWindows()[0]
+    if (win) win.setAlwaysOnTop(Boolean(enabled))
+    return { ok: true }
+  } catch (err) {
+    console.error('set-always-on-top error', err)
+    return { ok: false }
+  }
+})
+
+ipcMain.handle('get-always-on-top', () => {
+  try {
+    const win = mainWindowRef || BrowserWindow.getAllWindows()[0]
+    if (win) return win.isAlwaysOnTop()
+    return false
+  } catch (err) {
+    console.error('get-always-on-top error', err)
+    return false
+  }
 })
 
 app.on('window-all-closed', () => {

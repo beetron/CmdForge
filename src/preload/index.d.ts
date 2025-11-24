@@ -28,6 +28,10 @@ declare global {
       getGroups: () => Promise<string[]>
       exportData: () => Promise<{ cancelled: boolean; filePath?: string }>
       importData: () => Promise<{ cancelled: boolean; count?: number } | { error: string }>
+      setAlwaysOnTop: (onTop: boolean) => Promise<{ ok: boolean }>
+      getAlwaysOnTop: () => Promise<boolean>
+      renameGroup: (oldName: string, newName: string) => Promise<{ ok: boolean; message?: string }>
+      deleteGroup: (groupName: string) => Promise<{ ok: boolean; message?: string }>
     }
   }
 }

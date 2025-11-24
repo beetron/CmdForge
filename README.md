@@ -22,7 +22,6 @@
 - [Key Features](#key-features)
 - [How to Use](#how-to-use)
   - [Adding Commands](#adding-commands)
-  - [Viewing Commands](#viewing-commands)
   - [Searching Commands](#searching-commands)
   - [Editing Commands](#editing-commands)
   - [Export Commands](#export-commands-backup)
@@ -43,9 +42,11 @@ CmdForge is a command snippet manager built with Electron, React, and TypeScript
 - **Add Commands**: Store command snippets with descriptions and group them by category
 - **Organize by Groups**: Create custom groups (e.g., Kubernetes, Docker, Git, etc.) to keep commands organized
 - **Quick Search**: Real-time search with wildcard support to find commands instantly
-- **Copy to Clipboard**: Click any command to copy it to your clipboard with visual feedback
-- **Edit Commands**: Update existing commands and their descriptions
-- **Delete Commands**: Remove commands you no longer need
+- **Inline Search Results & Copy**: Search results appear inline on the Home page; click any command to copy with visual feedback (✓ Copied!)
+- **Edit Commands**: Update existing commands and their descriptions; open the Add page to edit
+- **Delete Commands**: Remove commands via inline delete or from the Add/Edit screen
+- **Group Management**: Rename or delete groups from the Add Command page
+- **Always On Top**: Toggle to keep the CmdForge window above other windows
 - **Export Commands**: Backup all your commands to a JSON file
 - **Import Commands**: Load commands from a JSON file (overwrites existing data)
 
@@ -66,23 +67,17 @@ CmdForge is a command snippet manager built with Electron, React, and TypeScript
 
 <div style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 20px; background-color: #2d2d2d;">
 
-### Viewing Commands
-
-1. Click **"View All Commands"** to see your entire command library
-2. Use the **Group Filter** dropdown to filter by category
-3. **Click any command** to copy it to your clipboard
-4. You'll see a **"✓ Copied!"** indicator when the copy is successful
-5. Use **"Click to copy!"** as a reminder that commands are clickable
-
-</div>
-
-<div style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 20px; background-color: #2d2d2d;">
-
 ### Searching Commands
 
 1. On the home page, type in the search box to find commands by name or description
 2. Use the **`*`** wildcard character for pattern matching (e.g., `*pod*` finds "get pods", "describe pods")
 3. Select a group from the **Group Filter** to narrow your search
+
+**Viewing & Copying from Search Results**
+
+1. Search results are shown inline on the Home page
+2. Click any command to copy it to your clipboard. A **✓ Copied!** indicator will appear when copying succeeds
+3. Use the **Edit** and **Delete** buttons next to each result to manage commands directly from the Home page
 
 </div>
 
@@ -90,10 +85,15 @@ CmdForge is a command snippet manager built with Electron, React, and TypeScript
 
 ### Editing Commands
 
-1. In **View All Commands**, click the **"Edit"** button next to a command
+1. From the Home page's search results, click the **"Edit"** button next to any command to open the Add page in edit mode
 2. Modify the command text, description, or group
-3. Click **"Update Command"** to save changes
-4. A **"Delete"** button appears when in edit mode if you want to remove the command
+3. Click **"Update"** to save changes
+4. A **"Delete"** button appears in edit mode if you want to remove the command; you can also use the inline **Delete** button on search results
+
+Managing Groups:
+
+1. When editing a command, use the **Change Group Name** control to rename a group across commands
+2. Use the **Delete Group** control to remove a group (this will ask for confirmation before deletion)
 
 </div>
 
@@ -218,7 +218,8 @@ npm run build:linux
 
 CmdForge follows a modular, component-based architecture:
 
-- **Pages**: HomePage, AddCommandPage, ViewCommandsPage
+- **Pages**: HomePage, AddCommandPage
+- **Note**: A `ViewCommandsPage` file exists in the project but the app uses the Home page search results for viewing commands.
 - **Components**: Reusable UI components (Common & Feature components)
 - **Hooks**: Custom React hooks for state management (useCommands, useSearch, useCopyToClipboard, etc.)
 - **Services**: Centralized API communication layer (commandService)

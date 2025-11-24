@@ -27,7 +27,12 @@ const api = {
   getCommands: (filters?: Filters) => ipcRenderer.invoke('db-get-commands', filters),
   getGroups: () => ipcRenderer.invoke('db-get-groups'),
   exportData: () => ipcRenderer.invoke('db-export'),
-  importData: () => ipcRenderer.invoke('db-import')
+  importData: () => ipcRenderer.invoke('db-import'),
+  setAlwaysOnTop: (onTop: boolean) => ipcRenderer.invoke('set-always-on-top', onTop),
+  getAlwaysOnTop: () => ipcRenderer.invoke('get-always-on-top'),
+  renameGroup: (oldName: string, newName: string) =>
+    ipcRenderer.invoke('db-rename-group', oldName, newName),
+  deleteGroup: (groupName: string) => ipcRenderer.invoke('db-delete-group', groupName)
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

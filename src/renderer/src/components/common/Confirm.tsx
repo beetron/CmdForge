@@ -18,7 +18,7 @@ export const Confirm: React.FC<ConfirmProps> = ({ show, message, onConfirm, onCa
           <button className="btn-delete" onClick={onConfirm}>
             Yes
           </button>
-          <button className="btn-secondary" onClick={onCancel}>
+          <button className="btn-delete" onClick={onCancel}>
             No
           </button>
         </div>

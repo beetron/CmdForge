@@ -7,7 +7,7 @@
 body {
   margin: 0;
   padding: 0;
-  overflow-y: auto;
+  overflow-y: hidden; /* prevent body scrolling so headers remain fixed */
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
   color: var(--ev-c-text-1);
   font-family:
@@ -16,7 +16,7 @@ body {
 
 #root {
   width: 100%;
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
 }
@@ -25,31 +25,37 @@ body {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 16px;
+  padding: 0 16px 16px 16px; /* remove top padding so headers can sit flush to window frame */
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .command-manager {
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .app-title {
   font-size: 2rem;
   font-weight: 700;
   margin: 0 0 16px 0;
-  text-align: center;
+  text-align: left;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 12px;
 }
 
 .app-logo {
-  width: 75px;
-  height: 75px;
+  width: 60px;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -76,7 +82,7 @@ body {
 }
 
 .action-row button {
-  flex: 1;
+  flex: 0 0 auto;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
@@ -86,6 +92,188 @@ body {
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
+}
+
+.action-row {
+  position: relative;
+}
+
+.add-btn {
+  min-width: 140px;
+}
+
+.options-menu {
+  position: relative;
+  margin-left: 0;
+}
+
+.action-right {
+  margin-left: auto;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.stay-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ev-c-text-1);
+}
+
+.stay-help {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--ev-c-text-1);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.stay-help .tooltip {
+  display: none;
+  position: absolute;
+  top: -32px;
+  right: 0;
+  background: rgba(30, 30, 50, 0.98);
+  color: var(--ev-c-text-1);
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+  transform: translateY(-4px);
+  opacity: 0;
+  transition: 0.12s ease-in-out;
+}
+
+.stay-help:hover .tooltip {
+  display: block;
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.options-button {
+  padding: 12px 20px;
+  min-width: 140px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 8px;
+}
+
+.options-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: rgba(30, 30, 50, 0.98);
+  z-index: 200;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 220px;
+  transform: translateY(-6px);
+  opacity: 0;
+  animation: dropdownIn 180ms cubic-bezier(0.2, 0, 0.2, 1) forwards;
+}
+
+.options-item {
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  color: var(--ev-c-text-1);
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.options-item:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.options-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+}
+
+.options-item-icon {
+  width: 16px;
+  height: 16px;
+  opacity: 0.9;
+}
+
+.options-icon {
+  margin-right: 8px;
+}
+
+@keyframes dropdownIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Toggle switch styling */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.08);
+  transition: 0.2s;
+  border-radius: 24px;
+}
+
+.switch .slider:before {
+  position: absolute;
+  content: '';
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  top: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: 0.2s;
+}
+
+.switch input:checked + .slider {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.switch input:checked + .slider:before {
+  transform: translateX(20px);
 }
 
 .action-row button:hover {
@@ -122,8 +310,12 @@ body {
   background: rgba(255, 255, 255, 0.03);
   border: 2px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 16px;
+  padding: 4px 16px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .suggestions-container h3 {
@@ -143,6 +335,11 @@ body {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
 }
 
 .suggestions-dropdown {
@@ -238,8 +435,8 @@ body {
   padding: 10px 20px;
   font-size: 0.95rem;
   font-weight: 600;
-  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-  color: #1a1a2e;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #ffffff;
   border: none;
   margin-bottom: 16px;
   display: inline-flex;
@@ -251,85 +448,94 @@ body {
 }
 
 .back-button:hover {
-  background: linear-gradient(135deg, #bff2ef 0%, #ffdfe9 100%);
+  background: linear-gradient(135deg, #7e8ff7 0%, #8b5bb8 100%);
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(168, 237, 234, 0.5);
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.5);
 }
 
-/* View Screen with Fixed Header */
-.view-screen {
+/* Home Screen with Fixed Header */
+.home-screen {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 100px);
+  flex: 1;
   position: relative;
+  scrollbar-gutter: stable;
 }
 
-.view-header {
-  position: sticky;
+.home-header {
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
+  max-width: 1200px;
+  margin: 0 auto;
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
   z-index: 100;
-  padding-bottom: 12px;
+  padding: 8px 16px 4px 16px; /* add padding for spacing */
   border-bottom: 2px solid rgba(255, 255, 255, 0.08);
 }
 
-.view-header-title {
+.header-top {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 12px;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: white;
+  justify-content: space-between;
+  padding: 0; /* padding handled by parent .home-header */
 }
 
-.view-header-title .app-logo {
-  width: 75px;
-  height: 75px;
-}
-
-.view-header-controls {
+.header-actions {
   display: flex;
+  align-items: center;
   gap: 12px;
-  align-items: center;
 }
 
-.view-header-controls .back-button {
-  margin-bottom: 0;
-}
-
-.view-header-controls .group-filter {
-  margin-bottom: 0;
-}
-
-.view-content {
+.home-content {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   overflow-y: auto;
-  padding-top: 12px;
+  margin-top: 210px; /* push content below fixed header */
+  padding: 0 16px 16px 16px; /* add side and bottom padding */
 }
 
 /* Add Screen with Fixed Header */
 .add-screen {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 30px);
+  flex: 1;
   position: relative;
+  scrollbar-gutter: stable;
+}
+
+.add-header-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  max-width: 1200px;
+  margin: 0 auto;
+  z-index: 100;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.08);
+  padding: 8px 16px 4px 16px; /* match home-header padding */
 }
 
 .add-header {
-  position: sticky;
-  top: 0;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  z-index: 100;
+  position: static;
   padding-bottom: 12px;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.08);
+}
+
+.add-header-inner {
+  display: flex;
+  flex-direction: column; /* stack title above controls */
+  align-items: stretch;
+  padding: 0; /* no padding needed - handled by wrapper */
+  gap: 8px;
 }
 
 .add-header-title {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 12px;
+  display: block;
+  margin: 0 0 4px 0; /* small gap below the title */
   font-size: 1.5rem;
   font-weight: 700;
   color: white;
@@ -344,6 +550,9 @@ body {
   display: flex;
   gap: 12px;
   align-items: center;
+  align-self: flex-start; /* place controls to the left on their own row */
+  justify-content: flex-start;
+  white-space: nowrap;
 }
 
 .add-header-controls .back-button {
@@ -356,8 +565,12 @@ body {
 
 .add-content {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   overflow-y: auto;
-  padding-top: 12px;
+  margin-top: 210px; /* push content below fixed header */
+  padding: 0 16px 16px 16px; /* add side and bottom padding */
 }
 
 .filter-controls {
@@ -393,7 +606,20 @@ body {
   background: rgba(255, 255, 255, 0.03);
   border: 2px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
-  padding: 16px;
+  padding: 4px 16px 16px 16px;
+  margin-bottom: 16px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-panel {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  padding: 12px 16px;
   margin-bottom: 16px;
 }
 
@@ -462,6 +688,21 @@ body {
   gap: 12px;
 }
 
+.btn-small {
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  min-width: auto;
+}
+
+.input-group-select--small {
+  width: 200px;
+}
+
+.btn-small + .input-group-text,
+.input-group-text + .btn-small {
+  margin-left: 8px;
+}
+
 .input-group-select {
   flex: 1;
   padding: 10px 14px;
@@ -518,6 +759,16 @@ button {
   transition: all 0.3s ease;
 }
 
+/* Disabled button styles to look dimmed */
+button[disabled],
+.btn-primary[disabled],
+.btn-small[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 .btn-primary {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
@@ -543,31 +794,47 @@ button {
 }
 
 .btn-edit {
-  padding: 8px 16px;
-  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  padding: 6px 14px;
+  background: linear-gradient(135deg, #1e2a5f 0%, #764ba2 100%);
   color: white;
   border: none;
   font-size: 0.9rem;
 }
 
 .btn-edit:hover {
-  background: linear-gradient(135deg, #5bef8d 0%, #52fae0 100%);
+  background: linear-gradient(135deg, #4b2a84 0%, #331a57 100%);
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(67, 233, 123, 0.5);
+  box-shadow: 0 4px 16px rgba(75, 35, 130, 0.5);
 }
 
 .btn-delete {
-  padding: 8px 16px;
-  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  padding: 6px 10px;
+  background: linear-gradient(135deg, #1e2a5f 0%, #764ba2 100%);
   color: white;
   border: none;
   font-size: 0.9rem;
 }
 
 .btn-delete:hover {
-  background: linear-gradient(135deg, #fb87ad 0%, #fed966 100%);
+  background: linear-gradient(135deg, #4b2a84 0%, #331a57 100%);
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(250, 112, 154, 0.5);
+  box-shadow: 0 4px 16px rgba(75, 35, 130, 0.5);
+}
+
+/* Delete button on Edit Command page - matches the Update (primary) style */
+.btn-delete-edit {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  font-size: 0.95rem;
+  border-radius: 8px;
+}
+
+.btn-delete-edit:hover {
+  background: linear-gradient(135deg, #7e8ff7 0%, #8b5bb8 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.5);
 }
 
 /* List Container */
@@ -576,6 +843,10 @@ button {
   border: 2px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   padding: 16px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 
 .list-container h2 {
@@ -595,6 +866,9 @@ button {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 .command-item {
@@ -609,9 +883,7 @@ button {
 }
 
 .command-item:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(102, 126, 234, 0.3);
-  transform: translateX(4px);
+  background: rgba(102, 126, 234, 0.2);
 }
 
 .command-content {
@@ -640,7 +912,7 @@ button {
 .command-group {
   display: inline-block;
   padding: 4px 12px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #a07e0d 70%, #764ba2 30%);
   color: white;
   border-radius: 12px;
   font-size: 0.85rem;
