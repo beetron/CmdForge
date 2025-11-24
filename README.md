@@ -1,29 +1,19 @@
-<!-- Header: left column image and right column title + badges.
-     Using a Markdown table is the most consistent formatting on GitHub.
-     NOTE: GitHub will apply table styling (borders); it cannot be removed
-     with inline CSS since GitHub sanitizes style attributes. -->
+| <img src="resources/CmdForgeLogo.png" alt="CmdForge Logo" width="200" height="200"> |
 
-<p>
-  <img src="resources/CmdForgeLogo.png" alt="CmdForge Logo" width="200" height="200" align="left" />
-</p>
-
-<h1>CmdForge</h1>
+# CmdForge
 
 Your personal command snippet manager. Consolidate and organize commands you use.
-
 (Windows 10/11, macOS)
-
-<p>
-  <img src="https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white" alt="Python 3.11">
-  <img src="https://img.shields.io/badge/Node-20-339933?logo=node.js&logoColor=white" alt="Node 20">
-  <img src="https://img.shields.io/badge/Electron-30.5.1-47848F?logo=electron&logoColor=white" alt="Electron 30.5.1">
-  <img src="https://img.shields.io/badge/React-19.1.1-61DAFB?logo=react&logoColor=black" alt="React 19.1.1">
-  <img src="https://img.shields.io/badge/TypeScript-5.9.2-3178C6?logo=typescript&logoColor=white" alt="TypeScript 5.9.2">
-  <img src="https://img.shields.io/badge/Vite-7.1.6-646CFF?logo=vite&logoColor=white" alt="Vite 7.1.6">
-  <img src="https://img.shields.io/badge/Better%20SQLite3-12.4.6-003B57?logo=sqlite&logoColor=white" alt="Better SQLite3 12.4.6">
-</p>
-
-<br clear="all" />
+<br>
+<img src="https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white">
+<img src="https://img.shields.io/badge/Node-20-339933?logo=node.js&logoColor=white">
+<img src="https://img.shields.io/badge/Electron-30.5.1-47848F?logo=electron&logoColor=white">
+<img src="https://img.shields.io/badge/React-19.1.1-61DAFB?logo=react&logoColor=black">
+<img src="https://img.shields.io/badge/TypeScript-5.9.2-3178C6?logo=typescript&logoColor=white">
+<img src="https://img.shields.io/badge/Vite-7.1.6-646CFF?logo=vite&logoColor=white">
+<img src="https://img.shields.io/badge/Better%20SQLite3-12.4.6-003B57?logo=sqlite&logoColor=white">
+|
+|---|---|
 
 ## Table of Contents
 
