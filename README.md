@@ -1,7 +1,7 @@
-<table border="0">
+<table style="border: none; border-collapse: collapse;">
   <tr>
-    <td><img src="resources/CmdForgeLogo.png" alt="CmdForge Logo" width="200" height="200"></td>
-    <td>
+    <td style="border: none;"><img src="resources/CmdForgeLogo.png" alt="CmdForge Logo" width="200" height="200"></td>
+    <td style="border: none;">
       <h1>CmdForge</h1><br/>
       Your personal command snippet manager. Consolidate and organize commands you use.<br/>
       (Windows 10/11, MacOS)<br/><br/>
