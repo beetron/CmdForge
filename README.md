@@ -2,9 +2,9 @@
 
 # CmdForge
 
-Your personal command snippet manager. Consolidate and organize commands you use.
+Your personal command snippet manager. Consolidate and organize commands you use.<br/>
 (Windows 10/11, macOS)
-<br>
+<br/><br/>
 <img src="https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white">
 <img src="https://img.shields.io/badge/Node-20-339933?logo=node.js&logoColor=white">
 <img src="https://img.shields.io/badge/Electron-30.5.1-47848F?logo=electron&logoColor=white">
@@ -12,8 +12,6 @@ Your personal command snippet manager. Consolidate and organize commands you use
 <img src="https://img.shields.io/badge/TypeScript-5.9.2-3178C6?logo=typescript&logoColor=white">
 <img src="https://img.shields.io/badge/Vite-7.1.6-646CFF?logo=vite&logoColor=white">
 <img src="https://img.shields.io/badge/Better%20SQLite3-12.4.6-003B57?logo=sqlite&logoColor=white">
-|
-|---|---|
 
 ## Table of Contents
 
