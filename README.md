@@ -3,7 +3,7 @@
   <div>
     <h1 style="margin: 0;">CmdForge</h1>
     <p>Your personal command snippet manager. Consolidate and organize commands you use.<br/>
-    <p>Tested on: MacOS, Windows 10/11
+    <p>(Windows 10/11, MacOS)
     <div style="margin-top: 10px;">
       <img src="https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white" alt="Python 3.11">
       <img src="https://img.shields.io/badge/Node-20-339933?logo=node.js&logoColor=white" alt="Node 20">
