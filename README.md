@@ -1,18 +1,18 @@
-<div style="display: table;">
-  <div style="display: table-cell; vertical-align: top;">
-    <img src="resources/CmdForgeLogo.png" alt="CmdForge Logo" width="200" height="200">
-  </div>
-  <div style="display: table-cell; vertical-align: top; padding-left: 20px;">
-    <h1>CmdForge</h1><br/>
-    Your personal command snippet manager. Consolidate and organize commands you use.<br/>
-    (Windows 10/11, MacOS)<br/><br/>
-    <img src="https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white" alt="Python 3.11">
-    <img src="https://img.shields.io/badge/Node-20-339933?logo=node.js&logoColor=white" alt="Node 20">
-    <img src="https://img.shields.io/badge/Electron-30.5.1-47848F?logo=electron&logoColor=white" alt="Electron 30.5.1">
-    <img src="https://img.shields.io/badge/React-19.1.1-61DAFB?logo=react&logoColor=black" alt="React 19.1.1">
-    <img src="https://img.shields.io/badge/TypeScript-5.9.2-3178C6?logo=typescript&logoColor=white" alt="TypeScript 5.9.2">
-    <img src="https://img.shields.io/badge/Vite-7.1.6-646CFF?logo=vite&logoColor=white" alt="Vite 7.1.6">
-    <img src="https://img.shields.io/badge/Better%20SQLite3-12.4.6-003B57?logo=sqlite&logoColor=white" alt="Better SQLite3 12.4.6">
+<div style="display: flex; align-items: center; gap: 20px;">
+  <img src="resources/CmdForgeLogo.png" alt="CmdForge Logo" width="200" height="200">
+  <div>
+    <h1 style="margin: 0;">CmdForge</h1>
+    <p>Your personal command snippet manager. Consolidate and organize commands you use.<br/>
+    <p>(Windows 10/11, MacOS)
+    <div style="margin-top: 10px;">
+      <img src="https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white" alt="Python 3.11">
+      <img src="https://img.shields.io/badge/Node-20-339933?logo=node.js&logoColor=white" alt="Node 20">
+      <img src="https://img.shields.io/badge/Electron-30.5.1-47848F?logo=electron&logoColor=white" alt="Electron 30.5.1">
+      <img src="https://img.shields.io/badge/React-19.1.1-61DAFB?logo=react&logoColor=black" alt="React 19.1.1">
+      <img src="https://img.shields.io/badge/TypeScript-5.9.2-3178C6?logo=typescript&logoColor=white" alt="TypeScript 5.9.2">
+      <img src="https://img.shields.io/badge/Vite-7.1.6-646CFF?logo=vite&logoColor=white" alt="Vite 7.1.6">
+      <img src="https://img.shields.io/badge/Better%20SQLite3-12.4.6-003B57?logo=sqlite&logoColor=white" alt="Better SQLite3 12.4.6">
+    </div>
   </div>
 </div>
 
