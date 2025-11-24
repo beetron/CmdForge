@@ -1,4 +1,4 @@
-| <img src="resources/CmdForgeLogo.png" alt="CmdForge Logo" width="200" height="200"> |
+<img src="resources/CmdForgeLogo.png" alt="CmdForge Logo" width="150" height="150">
 
 # CmdForge
 
