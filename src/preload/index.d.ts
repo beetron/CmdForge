@@ -46,6 +46,9 @@ declare global {
         content?: string | null;
       }>;
       keystoreDelete: () => Promise<{ ok: boolean }>;
+      keystoreSaveSheet: (sheetId: string) => Promise<{ ok: boolean }>;
+      keystoreLoadSheet: () => Promise<{ ok: boolean; content?: string | null }>;
+      keystoreDeleteAll: () => Promise<{ ok: boolean }>;
     };
   }
 }
