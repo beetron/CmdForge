@@ -23,6 +23,7 @@ interface HomePageProps {
   onAddClick: () => void;
   onExport: () => void;
   onImport: () => void;
+  onGoogleSync?: () => void;
 }
 
 export const HomePage: React.FC<HomePageProps> = ({
@@ -41,7 +42,8 @@ export const HomePage: React.FC<HomePageProps> = ({
   onDelete,
   onAddClick,
   onExport,
-  onImport
+  onImport,
+  onGoogleSync
 }) => {
   return (
     <div className="home-screen">
@@ -95,7 +97,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             Add Command
           </button>
           <div className="action-right">
-            <OptionsMenu onExport={onExport} onImport={onImport} />
+            <OptionsMenu onExport={onExport} onImport={onImport} onGoogleSync={onGoogleSync} />
           </div>
         </div>
       </div>

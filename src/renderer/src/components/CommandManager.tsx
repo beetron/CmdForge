@@ -3,6 +3,7 @@ import { HomePage } from "../pages/HomePage";
 import { AddCommandPage } from "../pages/AddCommandPage";
 import { Alert } from "./common/Alert";
 import { Confirm } from "./common/Confirm";
+import GoogleSyncModal from "./common/GoogleSyncModal";
 import { useCommands } from "../hooks/useCommands";
 import { useSearch } from "../hooks/useSearch";
 import { useAlert } from "../hooks/useAlert";
@@ -25,6 +26,7 @@ export default function CommandManager(): React.JSX.Element {
   const { confirmMessage, showConfirm, showCustomConfirm, closeConfirm } = useConfirm();
   const { copiedId, copyToClipboard } = useCopyToClipboard();
   const [stayOnTop, setStayOnTop] = useState<boolean>(false);
+  const [showGoogleSync, setShowGoogleSync] = useState<boolean>(false);
 
   // Keyboard ESC handler
   useEffect(() => {
@@ -211,6 +213,7 @@ export default function CommandManager(): React.JSX.Element {
           }}
           onExport={handleExport}
           onImport={handleImport}
+          onGoogleSync={() => setShowGoogleSync(true)}
           stayOnTop={stayOnTop}
           onSetStayOnTop={setStayOnTop}
         />
@@ -244,6 +247,7 @@ export default function CommandManager(): React.JSX.Element {
         onConfirm={() => closeConfirm(true)}
         onCancel={() => closeConfirm(false)}
       />
+      <GoogleSyncModal show={showGoogleSync} onClose={() => setShowGoogleSync(false)} />
     </div>
   );
 }

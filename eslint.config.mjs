@@ -28,5 +28,10 @@ export default defineConfig(
       ...eslintPluginReactRefresh.configs.vite.rules
     }
   },
-  eslintConfigPrettier
+  eslintConfigPrettier,
+  {
+    rules: {
+      "prettier/prettier": ["error", { singleQuote: false, semi: true }]
+    }
+  }
 );

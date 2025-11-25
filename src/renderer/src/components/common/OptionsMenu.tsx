@@ -3,9 +3,10 @@ import React, { useEffect, useRef, useState } from "react";
 interface OptionsMenuProps {
   onExport: () => void;
   onImport: () => void;
+  onGoogleSync?: () => void;
 }
 
-export const OptionsMenu: React.FC<OptionsMenuProps> = ({ onExport, onImport }) => {
+export const OptionsMenu: React.FC<OptionsMenuProps> = ({ onExport, onImport, onGoogleSync }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement | null>(null);
 
@@ -52,6 +53,35 @@ export const OptionsMenu: React.FC<OptionsMenuProps> = ({ onExport, onImport }) 
             tabIndex={0}
             onClick={() => {
               setOpen(false);
+              onGoogleSync?.();
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                setOpen(false);
+                onGoogleSync?.();
+              }
+            }}
+          >
+            <svg
+              className="options-item-icon"
+              viewBox="0 0 24 24"
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            >
+              <path d="M20 17.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 16.25" />
+              <path d="M16 16l-4-4-4 4" />
+            </svg>
+            Google Sync
+          </div>
+          <div
+            className="options-item"
+            role="button"
+            tabIndex={0}
+            onClick={() => {
+              setOpen(false);
               onExport();
             }}
             onKeyDown={(e) => {
@@ -76,6 +106,7 @@ export const OptionsMenu: React.FC<OptionsMenuProps> = ({ onExport, onImport }) 
             </svg>
             Export
           </div>
+
           <div
             className="options-item"
             role="button"

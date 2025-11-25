@@ -1031,6 +1031,40 @@ button[disabled],
   text-align: center;
 }
 
+/* Google Sync specific modal adjustments */
+.modal-content.google-sync-modal {
+  /* ensure small margin on sides so it doesn't hug the window */
+  margin: 0 2px;
+  /* Make the modal use 90% of the parent window width (capped to a reasonable max)
+     and reduce horizontal padding so it doesn't hug the window */
+  width: 90%;
+  max-width: 900px;
+  padding-left: 2px;
+  padding-right: 2px;
+  /* reduce overall padding around the modal to avoid hugging the viewport */
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+.modal-content.google-sync-modal .modal-message {
+  text-align: left; /* align intro text and list to the left for readability */
+}
+/* Add inner padding for message area so content does not touch modal edges */
+.modal-content.google-sync-modal .modal-message {
+  padding: 16px;
+}
+
+/* Warning text for Google Sync modal */
+.modal-content.google-sync-modal .modal-warning {
+  color: #ffcc00; /* yellow-ish warning */
+  background: rgba(255, 204, 0, 0.05);
+  border: 1px solid rgba(255, 204, 0, 0.15);
+  padding: 8px;
+  margin: 8px 0;
+  border-radius: 6px;
+  text-align: left;
+}
+
 .modal-actions {
   display: flex;
   gap: 12px;

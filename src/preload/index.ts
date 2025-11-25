@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer } from "electron";
+import { contextBridge, ipcRenderer, safeStorage } from "electron";
 import { electronAPI } from "@electron-toolkit/preload";
 
 // Custom APIs for renderer
@@ -41,7 +41,27 @@ const api = {
 if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld("electron", electronAPI);
-    contextBridge.exposeInMainWorld("api", api);
+    const apiFull = {
+      ...api,
+      loadGoogleKey: (): Promise<{ canceled: boolean; filePath?: string; content?: string }> =>
+        ipcRenderer.invoke("google-load-key"),
+      saveGoogleKey: (content: string): Promise<{ ok: boolean }> =>
+        ipcRenderer.invoke("google-save-key", content),
+      encryptKey: (content: string): Promise<string> =>
+        // returns base64 encoded encrypted value
+        Promise.resolve(safeStorage.encryptString(content).toString("base64")),
+      decryptKey: (base64: string): Promise<string> =>
+        Promise.resolve(safeStorage.decryptString(Buffer.from(base64, "base64"))),
+      // Keystore handlers - persist the base64 encrypted key via main process
+      keystoreSave: (base64: string) => ipcRenderer.invoke("keystore-save", base64),
+      keystoreLoad: () => ipcRenderer.invoke("keystore-load"),
+      keystoreDelete: () => ipcRenderer.invoke("keystore-delete"),
+      // sheet id keystore
+      keystoreSaveSheet: (sheetId: string) => ipcRenderer.invoke("keystore-save-sheet", sheetId),
+      keystoreLoadSheet: () => ipcRenderer.invoke("keystore-load-sheet"),
+      keystoreDeleteAll: () => ipcRenderer.invoke("keystore-delete-all")
+    };
+    contextBridge.exposeInMainWorld("api", apiFull);
   } catch (error) {
     console.error(error);
   }

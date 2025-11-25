@@ -32,6 +32,20 @@ declare global {
       getAlwaysOnTop: () => Promise<boolean>;
       renameGroup: (oldName: string, newName: string) => Promise<{ ok: boolean; message?: string }>;
       deleteGroup: (groupName: string) => Promise<{ ok: boolean; message?: string }>;
+      loadGoogleKey: () => Promise<{
+        canceled: boolean;
+        filePath?: string;
+        content?: string;
+      }>;
+      saveGoogleKey: (content: string) => Promise<{ ok: boolean }>;
+      encryptKey: (content: string) => Promise<string>;
+      decryptKey: (base64: string) => Promise<string>;
+      keystoreSave: (base64: string) => Promise<{ ok: boolean; path?: string }>;
+      keystoreLoad: () => Promise<{
+        ok: boolean;
+        content?: string | null;
+      }>;
+      keystoreDelete: () => Promise<{ ok: boolean }>;
     };
   }
 }

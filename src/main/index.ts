@@ -1,4 +1,5 @@
 import { app, shell, BrowserWindow, ipcMain, dialog, nativeImage } from "electron";
+import keytar from "keytar";
 import fs from "fs";
 import { join } from "path";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
@@ -377,6 +378,8 @@ app.whenReady().then(async () => {
         return { ok: true };
       });
 
+      // existing DB handlers continue
+
       ipcMain.handle(
         "db-get-commands",
         (_, filters: { groupName?: string; search?: string } | undefined) => {
@@ -534,6 +537,109 @@ ipcMain.handle("get-always-on-top", () => {
   } catch (err) {
     console.error("get-always-on-top error", err);
     return false;
+  }
+});
+
+// Google Key handling (Load and Save) - registered globally so available regardless of DB backend
+ipcMain.handle("google-load-key", async () => {
+  const { canceled, filePaths } = await dialog.showOpenDialog({
+    title: "Load Google service account key",
+    filters: [{ name: "JSON", extensions: ["json"] }],
+    properties: ["openFile"]
+  });
+  if (canceled || !filePaths || filePaths.length === 0) return { canceled: true };
+  try {
+    const content = fs.readFileSync(filePaths[0], "utf8");
+    return { canceled: false, filePath: filePaths[0], content };
+  } catch (err) {
+    console.error("Failed to read Google key", err);
+    return { canceled: true };
+  }
+});
+
+ipcMain.handle("google-save-key", async (_, content: string) => {
+  const { canceled, filePath } = await dialog.showSaveDialog({
+    title: "Save Google service account key",
+    defaultPath: join(app.getPath("documents"), "service-account.json"),
+    filters: [{ name: "JSON", extensions: ["json"] }]
+  });
+  if (!filePath || canceled) return { ok: false };
+  try {
+    fs.writeFileSync(filePath, content, "utf8");
+    return { ok: true };
+  } catch (err) {
+    console.error("Failed to save Google key", err);
+    return { ok: false };
+  }
+});
+
+// Keystore persistence in app userData
+const KEYSTORE_FILENAME = "cmdforge-credentials.b64";
+const KEY_SERVICE = "CmdForge";
+const KEY_ACCOUNT = "google-service-account";
+const SHEET_ACCOUNT = "google-sheet-id";
+ipcMain.handle("keystore-save", async (_, base64: string) => {
+  try {
+    await keytar.setPassword(KEY_SERVICE, KEY_ACCOUNT, base64);
+    return { ok: true };
+  } catch (err) {
+    console.error("keystore-save error", err);
+    return { ok: false };
+  }
+});
+
+ipcMain.handle("keystore-load", async () => {
+  try {
+    const content = await keytar.getPassword(KEY_SERVICE, KEY_ACCOUNT);
+    if (!content) return { ok: false, content: null };
+    return { ok: true, content };
+  } catch (err) {
+    console.error("keystore-load error", err);
+    return { ok: false, content: null };
+  }
+});
+
+ipcMain.handle("keystore-delete", async () => {
+  try {
+    const ok = await keytar.deletePassword(KEY_SERVICE, KEY_ACCOUNT);
+    return { ok };
+  } catch (err) {
+    console.error("keystore-delete error", err);
+    return { ok: false };
+  }
+});
+
+// Sheet ID keystore handlers
+ipcMain.handle("keystore-save-sheet", async (_, sheetId: string) => {
+  try {
+    await keytar.setPassword(KEY_SERVICE, SHEET_ACCOUNT, sheetId);
+    return { ok: true };
+  } catch (err) {
+    console.error("keystore-save-sheet error", err);
+    return { ok: false };
+  }
+});
+ipcMain.handle("keystore-load-sheet", async () => {
+  try {
+    const content = await keytar.getPassword(KEY_SERVICE, SHEET_ACCOUNT);
+    if (!content) return { ok: false, content: null };
+    return { ok: true, content };
+  } catch (err) {
+    console.error("keystore-load-sheet error", err);
+    return { ok: false, content: null };
+  }
+});
+ipcMain.handle("keystore-delete-all", async () => {
+  try {
+    await keytar.deletePassword(KEY_SERVICE, KEY_ACCOUNT);
+    await keytar.deletePassword(KEY_SERVICE, SHEET_ACCOUNT);
+    // Also remove legacy file if present
+    const p = join(app.getPath("userData"), KEYSTORE_FILENAME);
+    if (fs.existsSync(p)) fs.unlinkSync(p);
+    return { ok: true };
+  } catch (err) {
+    console.error("keystore-delete-all error", err);
+    return { ok: false };
   }
 });
 
