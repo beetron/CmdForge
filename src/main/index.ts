@@ -1,7 +1,7 @@
-import { app, shell, BrowserWindow, ipcMain, dialog, nativeImage } from 'electron'
-import fs from 'fs'
-import { join } from 'path'
-import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import { app, shell, BrowserWindow, ipcMain, dialog, nativeImage } from "electron";
+import fs from "fs";
+import { join } from "path";
+import { electronApp, optimizer, is } from "@electron-toolkit/utils";
 // Resolve the app icon path in a way that works both for development and for packaged builds.
 // - In development, we use the project's resources directory
 // - In packaged builds, assets may be unpacked under process.resourcesPath/app.asar.unpacked/resources
@@ -10,54 +10,54 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 // icon on Windows if no icon is provided.
 function resolveAppIcon(): string | undefined {
   try {
-    const devPng = join(__dirname, '../../resources/icon.png')
-    const devIco = join(__dirname, '../../resources/icon.ico')
-    const devIcns = join(__dirname, '../../build/icon.icns')
-    const packagedIco = join(process.resourcesPath, 'icon.ico')
+    const devPng = join(__dirname, "../../resources/icon.png");
+    const devIco = join(__dirname, "../../resources/icon.ico");
+    const devIcns = join(__dirname, "../../build/icon.icns");
+    const packagedIco = join(process.resourcesPath, "icon.ico");
     const packagedUnpackedIco = join(
       process.resourcesPath,
-      'app.asar.unpacked',
-      'resources',
-      'icon.ico'
-    )
-    const packagedIcns = join(process.resourcesPath, 'icon.icns')
+      "app.asar.unpacked",
+      "resources",
+      "icon.ico"
+    );
+    const packagedIcns = join(process.resourcesPath, "icon.icns");
     const packagedUnpackedIcns = join(
       process.resourcesPath,
-      'app.asar.unpacked',
-      'resources',
-      'icon.icns'
-    )
+      "app.asar.unpacked",
+      "resources",
+      "icon.icns"
+    );
     const packagedUnpackedPng = join(
       process.resourcesPath,
-      'app.asar.unpacked',
-      'resources',
-      'icon.png'
-    )
+      "app.asar.unpacked",
+      "resources",
+      "icon.png"
+    );
 
     if (is.dev) {
       // Prefer ico, then icns, then png in dev
-      if (fs.existsSync(devIco)) return devIco
-      if (fs.existsSync(devIcns)) return devIcns
-      if (fs.existsSync(devPng)) return devPng
-      return undefined
+      if (fs.existsSync(devIco)) return devIco;
+      if (fs.existsSync(devIcns)) return devIcns;
+      if (fs.existsSync(devPng)) return devPng;
+      return undefined;
     }
 
-    if (fs.existsSync(packagedIco)) return packagedIco
-    if (fs.existsSync(packagedIcns)) return packagedIcns
-    if (fs.existsSync(packagedUnpackedIco)) return packagedUnpackedIco
-    if (fs.existsSync(packagedUnpackedIcns)) return packagedUnpackedIcns
-    if (fs.existsSync(packagedUnpackedPng)) return packagedUnpackedPng
-    return undefined
+    if (fs.existsSync(packagedIco)) return packagedIco;
+    if (fs.existsSync(packagedIcns)) return packagedIcns;
+    if (fs.existsSync(packagedUnpackedIco)) return packagedUnpackedIco;
+    if (fs.existsSync(packagedUnpackedIcns)) return packagedUnpackedIcns;
+    if (fs.existsSync(packagedUnpackedPng)) return packagedUnpackedPng;
+    return undefined;
   } catch {
-    return undefined
+    return undefined;
   }
 }
 
-const iconPath = resolveAppIcon()
-const icon = iconPath ? nativeImage.createFromPath(iconPath) : undefined
+const iconPath = resolveAppIcon();
+const icon = iconPath ? nativeImage.createFromPath(iconPath) : undefined;
 
-let Database: unknown = null
-let mainWindowRef: BrowserWindow | null = null
+let Database: unknown = null;
+let mainWindowRef: BrowserWindow | null = null;
 
 function createWindow(): void {
   // Create the browser window with rounded corners
@@ -70,15 +70,15 @@ function createWindow(): void {
     transparent: false,
     icon,
     // roundedCorners is only supported on Windows 11+
-    ...(process.platform === 'win32' ? { roundedCorners: true } : {}),
+    ...(process.platform === "win32" ? { roundedCorners: true } : {}),
     webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
+      preload: join(__dirname, "../preload/index.js"),
       sandbox: false
     }
-  })
+  });
 
   // Apply content styling
-  mainWindow.webContents.once('did-finish-load', () => {
+  mainWindow.webContents.once("did-finish-load", () => {
     mainWindow.webContents.insertCSS(`
       * {
         box-sizing: border-box;
@@ -93,68 +93,68 @@ function createWindow(): void {
         width: 100vw;
         overflow: auto;
       }
-    `)
-  })
+    `);
+  });
 
-  mainWindow.on('ready-to-show', () => {
-    mainWindow.show()
-  })
+  mainWindow.on("ready-to-show", () => {
+    mainWindow.show();
+  });
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url)
-    return { action: 'deny' }
-  })
+    shell.openExternal(details.url);
+    return { action: "deny" };
+  });
 
-  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
+  if (is.dev && process.env["ELECTRON_RENDERER_URL"]) {
+    mainWindow.loadURL(process.env["ELECTRON_RENDERER_URL"]);
   } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
+    mainWindow.loadFile(join(__dirname, "../renderer/index.html"));
   }
-  mainWindowRef = mainWindow
+  mainWindowRef = mainWindow;
 }
 
 app.whenReady().then(async () => {
   // Dynamically import better-sqlite3 if available at runtime (optional dependency)
   try {
-    const dbModule = await import('better-sqlite3')
-    Database = (dbModule as unknown as { default?: unknown }).default ?? (dbModule as unknown)
+    const dbModule = await import("better-sqlite3");
+    Database = (dbModule as unknown as { default?: unknown }).default ?? (dbModule as unknown);
   } catch {
     // Not available - staying with JSON fallback
   }
 
-  electronApp.setAppUserModelId('com.electron')
-  app.on('browser-window-created', (_, window) => {
-    optimizer.watchWindowShortcuts(window)
-  })
+  electronApp.setAppUserModelId("com.electron");
+  app.on("browser-window-created", (_, window) => {
+    optimizer.watchWindowShortcuts(window);
+  });
 
-  ipcMain.on('ping', () => console.log('pong'))
+  ipcMain.on("ping", () => console.log("pong"));
 
   // DB initialization with better-sqlite3
   try {
-    const dataPath = app.getPath('userData')
-    const dbPath = join(dataPath, 'commands.db')
-    const jsonPath = join(dataPath, 'commands.json')
-    if (!fs.existsSync(dataPath)) fs.mkdirSync(dataPath, { recursive: true })
+    const dataPath = app.getPath("userData");
+    const dbPath = join(dataPath, "commands.db");
+    const jsonPath = join(dataPath, "commands.json");
+    if (!fs.existsSync(dataPath)) fs.mkdirSync(dataPath, { recursive: true });
 
-    let useSqlite = false
+    let useSqlite = false;
     if (Database) {
       try {
         type PreparedStatement = {
-          run: (...args: unknown[]) => { lastInsertRowid?: number }
-          get: (...args: unknown[]) => unknown
-          all: (...args: unknown[]) => unknown[]
-        }
+          run: (...args: unknown[]) => { lastInsertRowid?: number };
+          get: (...args: unknown[]) => unknown;
+          all: (...args: unknown[]) => unknown[];
+        };
 
         type BetterSqlite3Ctor = new (filename: string) => {
-          pragma: (s: string) => unknown
-          prepare: (sql: string) => PreparedStatement
-          transaction: <T extends (...args: unknown[]) => unknown>(fn: T) => T
-        }
+          pragma: (s: string) => unknown;
+          prepare: (sql: string) => PreparedStatement;
+          transaction: <T extends (...args: unknown[]) => unknown>(fn: T) => T;
+        };
 
-        const DBConstructor = Database as unknown as BetterSqlite3Ctor
-        const db = new DBConstructor(dbPath)
-        useSqlite = true
-        db.pragma('journal_mode = WAL')
+        const DBConstructor = Database as unknown as BetterSqlite3Ctor;
+        const db = new DBConstructor(dbPath);
+        useSqlite = true;
+        db.pragma("journal_mode = WAL");
 
         db.prepare(
           `
@@ -166,135 +166,136 @@ app.whenReady().then(async () => {
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
           )
         `
-        ).run()
+        ).run();
 
         ipcMain.handle(
-          'db-create-command',
+          "db-create-command",
           (_, payload: { command: string; description?: string; groupName?: string }) => {
             const info = db
-              .prepare('INSERT INTO commands (command, description, groupName) VALUES (?, ?, ?)')
-              .run(payload.command, payload.description || '', payload.groupName || '') as {
-              lastInsertRowid?: number
-            }
+              .prepare("INSERT INTO commands (command, description, groupName) VALUES (?, ?, ?)")
+              .run(payload.command, payload.description || "", payload.groupName || "") as {
+              lastInsertRowid?: number;
+            };
             return db
-              .prepare('SELECT * FROM commands WHERE id = ?')
-              .get(info.lastInsertRowid as number)
+              .prepare("SELECT * FROM commands WHERE id = ?")
+              .get(info.lastInsertRowid as number);
           }
-        )
+        );
 
         ipcMain.handle(
-          'db-update-command',
+          "db-update-command",
           (
             _,
             payload: { id: number; command: string; description?: string; groupName?: string }
           ) => {
             db.prepare(
-              'UPDATE commands SET command = ?, description = ?, groupName = ? WHERE id = ?'
-            ).run(payload.command, payload.description || '', payload.groupName || '', payload.id)
-            return db.prepare('SELECT * FROM commands WHERE id = ?').get(payload.id)
+              "UPDATE commands SET command = ?, description = ?, groupName = ? WHERE id = ?"
+            ).run(payload.command, payload.description || "", payload.groupName || "", payload.id);
+            return db.prepare("SELECT * FROM commands WHERE id = ?").get(payload.id);
           }
-        )
+        );
 
-        ipcMain.handle('db-delete-command', (_, id: number) => {
-          db.prepare('DELETE FROM commands WHERE id = ?').run(id)
-          return { ok: true }
-        })
+        ipcMain.handle("db-delete-command", (_, id: number) => {
+          db.prepare("DELETE FROM commands WHERE id = ?").run(id);
+          return { ok: true };
+        });
 
         ipcMain.handle(
-          'db-get-commands',
+          "db-get-commands",
           (_, filters: { groupName?: string; search?: string } | undefined) => {
-            if (!filters) return db.prepare('SELECT * FROM commands ORDER BY created_at DESC').all()
+            if (!filters)
+              return db.prepare("SELECT * FROM commands ORDER BY created_at DESC").all();
             if (filters.groupName)
               return db
-                .prepare('SELECT * FROM commands WHERE groupName = ? ORDER BY created_at DESC')
-                .all(filters.groupName)
+                .prepare("SELECT * FROM commands WHERE groupName = ? ORDER BY created_at DESC")
+                .all(filters.groupName);
             if (filters.search) {
-              const term = `%${filters.search}%`
+              const term = `%${filters.search}%`;
               return db
                 .prepare(
-                  'SELECT * FROM commands WHERE (command LIKE ? OR description LIKE ?) ORDER BY created_at DESC'
+                  "SELECT * FROM commands WHERE (command LIKE ? OR description LIKE ?) ORDER BY created_at DESC"
                 )
-                .all(term, term)
+                .all(term, term);
             }
-            return db.prepare('SELECT * FROM commands ORDER BY created_at DESC').all()
+            return db.prepare("SELECT * FROM commands ORDER BY created_at DESC").all();
           }
-        )
+        );
 
-        ipcMain.handle('db-get-groups', () =>
+        ipcMain.handle("db-get-groups", () =>
           db
             .prepare(
-              'SELECT DISTINCT groupName FROM commands WHERE groupName IS NOT NULL ORDER BY groupName'
+              "SELECT DISTINCT groupName FROM commands WHERE groupName IS NOT NULL ORDER BY groupName"
             )
             .all()
             .map((r: unknown) => (r as { groupName: string }).groupName)
-        )
+        );
 
-        ipcMain.handle('db-rename-group', async (_, oldName: string, newName: string) => {
-          if (!oldName || !newName || oldName === newName) return { ok: false, message: 'No-op' }
+        ipcMain.handle("db-rename-group", async (_, oldName: string, newName: string) => {
+          if (!oldName || !newName || oldName === newName) return { ok: false, message: "No-op" };
           try {
             const exists = db
-              .prepare('SELECT 1 FROM commands WHERE groupName = ? LIMIT 1')
-              .get(newName)
-            if (exists) return { ok: false, message: 'Group name already in use' }
-            db.prepare('UPDATE commands SET groupName = ? WHERE groupName = ?').run(
+              .prepare("SELECT 1 FROM commands WHERE groupName = ? LIMIT 1")
+              .get(newName);
+            if (exists) return { ok: false, message: "Group name already in use" };
+            db.prepare("UPDATE commands SET groupName = ? WHERE groupName = ?").run(
               newName,
               oldName
-            )
-            return { ok: true }
+            );
+            return { ok: true };
           } catch (err) {
-            console.error('db-rename-group sqlite error', err)
-            return { ok: false, message: 'Failed to rename group' }
+            console.error("db-rename-group sqlite error", err);
+            return { ok: false, message: "Failed to rename group" };
           }
-        })
+        });
 
-        ipcMain.handle('db-delete-group', async (_, groupName: string) => {
-          if (!groupName) return { ok: false, message: 'Missing group name' }
+        ipcMain.handle("db-delete-group", async (_, groupName: string) => {
+          if (!groupName) return { ok: false, message: "Missing group name" };
           try {
             const exists = db
-              .prepare('SELECT 1 FROM commands WHERE groupName = ? LIMIT 1')
-              .get(groupName)
-            if (!exists) return { ok: false, message: 'Group not found' }
-            db.prepare('DELETE FROM commands WHERE groupName = ?').run(groupName)
-            return { ok: true }
+              .prepare("SELECT 1 FROM commands WHERE groupName = ? LIMIT 1")
+              .get(groupName);
+            if (!exists) return { ok: false, message: "Group not found" };
+            db.prepare("DELETE FROM commands WHERE groupName = ?").run(groupName);
+            return { ok: true };
           } catch (err) {
-            console.error('db-delete-group sqlite error', err)
-            return { ok: false, message: 'Failed to delete group' }
+            console.error("db-delete-group sqlite error", err);
+            return { ok: false, message: "Failed to delete group" };
           }
-        })
+        });
 
-        ipcMain.handle('db-export', async () => {
-          const rows = db.prepare('SELECT * FROM commands ORDER BY created_at DESC').all()
+        ipcMain.handle("db-export", async () => {
+          const rows = db.prepare("SELECT * FROM commands ORDER BY created_at DESC").all();
           const { filePath } = await dialog.showSaveDialog({
-            title: 'Export commands as JSON',
-            defaultPath: join(app.getPath('documents'), 'cmdforge-commands.json'),
-            filters: [{ name: 'JSON', extensions: ['json'] }]
-          })
-          if (!filePath) return { cancelled: true }
-          fs.writeFileSync(filePath, JSON.stringify(rows, null, 2), 'utf8')
-          return { cancelled: false, filePath }
-        })
+            title: "Export commands as JSON",
+            defaultPath: join(app.getPath("documents"), "cmdforge-commands.json"),
+            filters: [{ name: "JSON", extensions: ["json"] }]
+          });
+          if (!filePath) return { cancelled: true };
+          fs.writeFileSync(filePath, JSON.stringify(rows, null, 2), "utf8");
+          return { cancelled: false, filePath };
+        });
 
-        ipcMain.handle('db-import', async () => {
+        ipcMain.handle("db-import", async () => {
           const { canceled, filePaths } = await dialog.showOpenDialog({
-            title: 'Import commands from JSON',
-            filters: [{ name: 'JSON', extensions: ['json'] }],
-            properties: ['openFile']
-          })
-          if (canceled || !filePaths || filePaths.length === 0) return { cancelled: true }
-          const content = fs.readFileSync(filePaths[0], 'utf8')
-          let parsed: Array<{ command: string; description?: string; groupName?: string }> = []
+            title: "Import commands from JSON",
+            filters: [{ name: "JSON", extensions: ["json"] }],
+            properties: ["openFile"]
+          });
+          if (canceled || !filePaths || filePaths.length === 0) return { cancelled: true };
+          const content = fs.readFileSync(filePaths[0], "utf8");
+          let parsed: Array<{ command: string; description?: string; groupName?: string }> = [];
           try {
-            parsed = JSON.parse(content)
+            parsed = JSON.parse(content);
           } catch (err) {
-            console.error('Import JSON parse error', err)
-            return { error: 'Invalid JSON file' }
+            console.error("Import JSON parse error", err);
+            return { error: "Invalid JSON file" };
           }
           // DELETE all existing commands
-          db.prepare('DELETE FROM commands').run()
+          db.prepare("DELETE FROM commands").run();
           // INSERT imported commands
           const insert = db.prepare(
-            'INSERT INTO commands (command, description, groupName) VALUES (?, ?, ?)'
-          )
+            "INSERT INTO commands (command, description, groupName) VALUES (?, ?, ?)"
+          );
           const insertMany = (
             db.transaction as unknown as (
               fn: (
@@ -304,96 +305,97 @@ app.whenReady().then(async () => {
               items: Array<{ command: string; description?: string; groupName?: string }>
             ) => void
           )((items) => {
-            for (const it of items) insert.run(it.command, it.description || '', it.groupName || '')
-          })
-          insertMany(parsed)
-          return { cancelled: false, count: parsed.length }
-        })
+            for (const it of items)
+              insert.run(it.command, it.description || "", it.groupName || "");
+          });
+          insertMany(parsed);
+          return { cancelled: false, count: parsed.length };
+        });
       } catch (err) {
-        console.warn('Failed to initialize SQLite, falling back to JSON storage', err)
-        useSqlite = false
+        console.warn("Failed to initialize SQLite, falling back to JSON storage", err);
+        useSqlite = false;
       }
     }
 
     // JSON fallback
     if (!useSqlite) {
-      if (!fs.existsSync(jsonPath)) fs.writeFileSync(jsonPath, JSON.stringify([], null, 2), 'utf8')
+      if (!fs.existsSync(jsonPath)) fs.writeFileSync(jsonPath, JSON.stringify([], null, 2), "utf8");
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const readAll = (): any[] => {
         try {
-          const content = fs.readFileSync(jsonPath, 'utf8')
-          return JSON.parse(content)
+          const content = fs.readFileSync(jsonPath, "utf8");
+          return JSON.parse(content);
         } catch (err) {
-          console.error('JSON DB read error', err)
-          return []
+          console.error("JSON DB read error", err);
+          return [];
         }
-      }
+      };
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const writeAll = (items: any[]): void =>
-        fs.writeFileSync(jsonPath, JSON.stringify(items, null, 2), 'utf8')
+        fs.writeFileSync(jsonPath, JSON.stringify(items, null, 2), "utf8");
 
       ipcMain.handle(
-        'db-create-command',
+        "db-create-command",
         (_, payload: { command: string; description?: string; groupName?: string }) => {
-          const rows = readAll()
-          const id = (rows.reduce((max, r) => (r.id && r.id > max ? r.id : max), 0) as number) + 1
+          const rows = readAll();
+          const id = (rows.reduce((max, r) => (r.id && r.id > max ? r.id : max), 0) as number) + 1;
           const newRow = {
             id,
             command: payload.command,
-            description: payload.description || '',
-            groupName: payload.groupName || '',
+            description: payload.description || "",
+            groupName: payload.groupName || "",
             created_at: new Date().toISOString()
-          }
-          rows.unshift(newRow)
-          writeAll(rows)
-          return newRow
+          };
+          rows.unshift(newRow);
+          writeAll(rows);
+          return newRow;
         }
-      )
+      );
 
       ipcMain.handle(
-        'db-update-command',
+        "db-update-command",
         (_, payload: { id: number; command: string; description?: string; groupName?: string }) => {
-          const rows = readAll()
-          const idx = rows.findIndex((r) => r.id === payload.id)
-          if (idx === -1) return null
+          const rows = readAll();
+          const idx = rows.findIndex((r) => r.id === payload.id);
+          if (idx === -1) return null;
           rows[idx] = {
             ...rows[idx],
             command: payload.command,
-            description: payload.description || '',
-            groupName: payload.groupName || ''
-          }
-          writeAll(rows)
-          return rows[idx]
+            description: payload.description || "",
+            groupName: payload.groupName || ""
+          };
+          writeAll(rows);
+          return rows[idx];
         }
-      )
+      );
 
-      ipcMain.handle('db-delete-command', (_, id: number) => {
-        const rows = readAll().filter((r) => r.id !== id)
-        writeAll(rows)
-        return { ok: true }
-      })
+      ipcMain.handle("db-delete-command", (_, id: number) => {
+        const rows = readAll().filter((r) => r.id !== id);
+        writeAll(rows);
+        return { ok: true };
+      });
 
       ipcMain.handle(
-        'db-get-commands',
+        "db-get-commands",
         (_, filters: { groupName?: string; search?: string } | undefined) => {
-          let rows = readAll()
-          if (!filters) return rows
-          if (filters.groupName) rows = rows.filter((r) => r.groupName === filters.groupName)
+          let rows = readAll();
+          if (!filters) return rows;
+          if (filters.groupName) rows = rows.filter((r) => r.groupName === filters.groupName);
           if (filters.search) {
-            const term = filters.search.toLowerCase()
+            const term = filters.search.toLowerCase();
             rows = rows.filter(
               (r) =>
                 r.command.toLowerCase().includes(term) ||
-                (r.description || '').toLowerCase().includes(term)
-            )
+                (r.description || "").toLowerCase().includes(term)
+            );
           }
-          return rows
+          return rows;
         }
-      )
+      );
 
-      ipcMain.handle('db-get-groups', () =>
+      ipcMain.handle("db-get-groups", () =>
         Array.from(
           new Set(
             readAll()
@@ -401,144 +403,144 @@ app.whenReady().then(async () => {
               .filter(Boolean)
           )
         ).sort()
-      )
+      );
 
-      ipcMain.handle('db-export', async () => {
-        const rows = readAll()
+      ipcMain.handle("db-export", async () => {
+        const rows = readAll();
         const { filePath } = await dialog.showSaveDialog({
-          title: 'Export commands as JSON',
-          defaultPath: join(app.getPath('documents'), 'cmdforge-commands.json'),
-          filters: [{ name: 'JSON', extensions: ['json'] }]
-        })
-        if (!filePath) return { cancelled: true }
-        fs.writeFileSync(filePath, JSON.stringify(rows, null, 2), 'utf8')
-        return { cancelled: false, filePath }
-      })
+          title: "Export commands as JSON",
+          defaultPath: join(app.getPath("documents"), "cmdforge-commands.json"),
+          filters: [{ name: "JSON", extensions: ["json"] }]
+        });
+        if (!filePath) return { cancelled: true };
+        fs.writeFileSync(filePath, JSON.stringify(rows, null, 2), "utf8");
+        return { cancelled: false, filePath };
+      });
 
-      ipcMain.handle('db-import', async () => {
+      ipcMain.handle("db-import", async () => {
         const { canceled, filePaths } = await dialog.showOpenDialog({
-          title: 'Import commands from JSON',
-          filters: [{ name: 'JSON', extensions: ['json'] }],
-          properties: ['openFile']
-        })
-        if (canceled || !filePaths || filePaths.length === 0) return { cancelled: true }
-        const content = fs.readFileSync(filePaths[0], 'utf8')
-        let parsed: Array<{ command: string; description?: string; groupName?: string }> = []
+          title: "Import commands from JSON",
+          filters: [{ name: "JSON", extensions: ["json"] }],
+          properties: ["openFile"]
+        });
+        if (canceled || !filePaths || filePaths.length === 0) return { cancelled: true };
+        const content = fs.readFileSync(filePaths[0], "utf8");
+        let parsed: Array<{ command: string; description?: string; groupName?: string }> = [];
         try {
-          parsed = JSON.parse(content)
+          parsed = JSON.parse(content);
         } catch (err) {
-          console.error('Import JSON parse error', err)
-          return { error: 'Invalid JSON file' }
+          console.error("Import JSON parse error", err);
+          return { error: "Invalid JSON file" };
         }
         // REPLACE all existing commands with imported data
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const newRows: any[] = []
-        let nextId = 1
+        const newRows: any[] = [];
+        let nextId = 1;
         for (const it of parsed)
           newRows.unshift({
             id: nextId++,
             command: it.command,
-            description: it.description || '',
-            groupName: it.groupName || '',
+            description: it.description || "",
+            groupName: it.groupName || "",
             created_at: new Date().toISOString()
-          })
-        writeAll(newRows)
-        return { cancelled: false, count: parsed.length }
-      })
+          });
+        writeAll(newRows);
+        return { cancelled: false, count: parsed.length };
+      });
 
       // JSON fallback rename group implementation
-      ipcMain.handle('db-rename-group', async (_, oldName: string, newName: string) => {
-        if (!oldName || !newName || oldName === newName) return { ok: false, message: 'No-op' }
+      ipcMain.handle("db-rename-group", async (_, oldName: string, newName: string) => {
+        if (!oldName || !newName || oldName === newName) return { ok: false, message: "No-op" };
         try {
-          const rows = readAll()
+          const rows = readAll();
           // Check for conflicts where a group already uses the new name
           const exists = rows.some(
             (r: unknown) => (r as { groupName?: string }).groupName === newName
-          )
-          if (exists) return { ok: false, message: 'Group name already in use' }
-          let changed = false
+          );
+          if (exists) return { ok: false, message: "Group name already in use" };
+          let changed = false;
           const newRows = rows.map((r: unknown) => {
-            const rr = r as { groupName?: string }
+            const rr = r as { groupName?: string };
             if (rr.groupName === oldName) {
-              changed = true
-              return { ...(r as Record<string, unknown>), groupName: newName }
+              changed = true;
+              return { ...(r as Record<string, unknown>), groupName: newName };
             }
-            return r
-          })
-          if (changed) writeAll(newRows)
-          return { ok: true }
+            return r;
+          });
+          if (changed) writeAll(newRows);
+          return { ok: true };
         } catch (err) {
-          console.error('db-rename-group json error', err)
-          return { ok: false, message: 'Failed to rename group' }
+          console.error("db-rename-group json error", err);
+          return { ok: false, message: "Failed to rename group" };
         }
-      })
+      });
 
-      ipcMain.handle('db-delete-group', async (_, groupName: string) => {
-        if (!groupName) return { ok: false, message: 'Missing group name' }
+      ipcMain.handle("db-delete-group", async (_, groupName: string) => {
+        if (!groupName) return { ok: false, message: "Missing group name" };
         try {
-          const rows = readAll()
+          const rows = readAll();
           const exists = rows.some(
             (r: unknown) => (r as { groupName?: string }).groupName === groupName
-          )
-          if (!exists) return { ok: false, message: 'Group not found' }
+          );
+          if (!exists) return { ok: false, message: "Group not found" };
           const newRows = rows.filter(
             (r: unknown) => (r as { groupName?: string }).groupName !== groupName
-          )
-          writeAll(newRows)
-          return { ok: true }
+          );
+          writeAll(newRows);
+          return { ok: true };
         } catch (err) {
-          console.error('db-delete-group json error', err)
-          return { ok: false, message: 'Failed to delete group' }
+          console.error("db-delete-group json error", err);
+          return { ok: false, message: "Failed to delete group" };
         }
-      })
+      });
     }
   } catch (err) {
-    console.error('DB init error', err)
+    console.error("DB init error", err);
   }
 
-  createWindow()
+  createWindow();
 
   // Set macOS Dock icon explicitly when available
-  if (process.platform === 'darwin' && icon) {
+  if (process.platform === "darwin" && icon) {
     try {
-      app.dock.setIcon(icon)
+      app.dock.setIcon(icon);
     } catch (err) {
-      console.warn('set Dock icon error', err)
+      console.warn("set Dock icon error", err);
     }
   }
 
-  app.on('activate', function () {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
-  })
-})
+  app.on("activate", function () {
+    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+  });
+});
 
 // Handle set-always-on-top
-ipcMain.handle('set-always-on-top', (_, enabled: boolean) => {
+ipcMain.handle("set-always-on-top", (_, enabled: boolean) => {
   try {
-    const win = mainWindowRef || BrowserWindow.getAllWindows()[0]
-    if (win) win.setAlwaysOnTop(Boolean(enabled))
-    return { ok: true }
+    const win = mainWindowRef || BrowserWindow.getAllWindows()[0];
+    if (win) win.setAlwaysOnTop(Boolean(enabled));
+    return { ok: true };
   } catch (err) {
-    console.error('set-always-on-top error', err)
-    return { ok: false }
+    console.error("set-always-on-top error", err);
+    return { ok: false };
   }
-})
+});
 
-ipcMain.handle('get-always-on-top', () => {
+ipcMain.handle("get-always-on-top", () => {
   try {
-    const win = mainWindowRef || BrowserWindow.getAllWindows()[0]
-    if (win) return win.isAlwaysOnTop()
-    return false
+    const win = mainWindowRef || BrowserWindow.getAllWindows()[0];
+    if (win) return win.isAlwaysOnTop();
+    return false;
   } catch (err) {
-    console.error('get-always-on-top error', err)
-    return false
+    console.error("get-always-on-top error", err);
+    return false;
   }
-})
+});
 
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") {
+    app.quit();
   }
-})
+});
 
 // Custom main process code can be added here.

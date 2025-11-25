@@ -1,16 +1,16 @@
-import React from 'react'
+import React from "react";
 
 interface GroupFilterProps {
-  value: string | undefined
-  groups: string[]
-  onChange: (value: string | undefined) => void
+  value: string | undefined;
+  groups: string[];
+  onChange: (value: string | undefined) => void;
 }
 
 export const GroupFilter: React.FC<GroupFilterProps> = ({ value, groups, onChange }) => {
   return (
     <select
       className="group-filter"
-      value={value || ''}
+      value={value || ""}
       onChange={(e) => onChange(e.target.value || undefined)}
     >
       <option value="">All Groups</option>
@@ -20,5 +20,5 @@ export const GroupFilter: React.FC<GroupFilterProps> = ({ value, groups, onChang
         </option>
       ))}
     </select>
-  )
-}
+  );
+};

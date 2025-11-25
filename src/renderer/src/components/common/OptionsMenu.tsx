@@ -1,31 +1,31 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from "react";
 
 interface OptionsMenuProps {
-  onExport: () => void
-  onImport: () => void
+  onExport: () => void;
+  onImport: () => void;
 }
 
 export const OptionsMenu: React.FC<OptionsMenuProps> = ({ onExport, onImport }) => {
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement | null>(null)
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const onClick = (e: MouseEvent): void => {
       if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false)
+        setOpen(false);
       }
-    }
-    window.addEventListener('click', onClick)
-    return () => window.removeEventListener('click', onClick)
-  }, [])
+    };
+    window.addEventListener("click", onClick);
+    return () => window.removeEventListener("click", onClick);
+  }, []);
 
   return (
     <div className="options-menu" ref={ref}>
       <button
         className="options-button btn-secondary"
         onClick={(e) => {
-          e.stopPropagation()
-          setOpen((v) => !v)
+          e.stopPropagation();
+          setOpen((v) => !v);
         }}
         aria-haspopup="true"
         aria-expanded={open}
@@ -51,13 +51,13 @@ export const OptionsMenu: React.FC<OptionsMenuProps> = ({ onExport, onImport }) 
             role="button"
             tabIndex={0}
             onClick={() => {
-              setOpen(false)
-              onExport()
+              setOpen(false);
+              onExport();
             }}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                setOpen(false)
-                onExport()
+              if (e.key === "Enter" || e.key === " ") {
+                setOpen(false);
+                onExport();
               }
             }}
           >
@@ -81,13 +81,13 @@ export const OptionsMenu: React.FC<OptionsMenuProps> = ({ onExport, onImport }) 
             role="button"
             tabIndex={0}
             onClick={() => {
-              setOpen(false)
-              onImport()
+              setOpen(false);
+              onImport();
             }}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                setOpen(false)
-                onImport()
+              if (e.key === "Enter" || e.key === " ") {
+                setOpen(false);
+                onImport();
               }
             }}
           >
@@ -109,5 +109,5 @@ export const OptionsMenu: React.FC<OptionsMenuProps> = ({ onExport, onImport }) 
         </div>
       )}
     </div>
-  )
-}
+  );
+};

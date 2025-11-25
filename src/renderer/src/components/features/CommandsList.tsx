@@ -1,13 +1,13 @@
-import React from 'react'
-import { Command } from '../../types/command'
+import React from "react";
+import { Command } from "../../types/command";
 
 interface CommandsListProps {
-  commands: Command[]
-  copiedId: number | null
-  onEdit: (cmd: Command) => void
-  onDelete: (id: number) => void
-  onCopy: (text: string, id: number) => void
-  empty?: boolean
+  commands: Command[];
+  copiedId: number | null;
+  onEdit: (cmd: Command) => void;
+  onDelete: (id: number) => void;
+  onCopy: (text: string, id: number) => void;
+  empty?: boolean;
 }
 
 export const CommandsList: React.FC<CommandsListProps> = ({
@@ -21,7 +21,7 @@ export const CommandsList: React.FC<CommandsListProps> = ({
   return (
     <div className="list-container">
       <h2>
-        Saved Commands ({commands.length}){' '}
+        Saved Commands ({commands.length}){" "}
         {commands.length > 0 && <span className="copy-hint">Click to copy!</span>}
       </h2>
       {empty ? (
@@ -35,7 +35,7 @@ export const CommandsList: React.FC<CommandsListProps> = ({
               key={c.id}
               className="command-item"
               onClick={() => onCopy(c.command, c.id!)}
-              style={{ cursor: 'pointer' }}
+              style={{ cursor: "pointer" }}
             >
               <div className="command-content">
                 <div className="command-header">
@@ -49,8 +49,8 @@ export const CommandsList: React.FC<CommandsListProps> = ({
                 <button
                   className="btn-edit"
                   onClick={(e) => {
-                    e.stopPropagation()
-                    onEdit(c)
+                    e.stopPropagation();
+                    onEdit(c);
                   }}
                 >
                   Edit
@@ -58,8 +58,8 @@ export const CommandsList: React.FC<CommandsListProps> = ({
                 <button
                   className="btn-delete"
                   onClick={(e) => {
-                    e.stopPropagation()
-                    onDelete(c.id!)
+                    e.stopPropagation();
+                    onDelete(c.id!);
                   }}
                 >
                   Delete
@@ -70,5 +70,5 @@ export const CommandsList: React.FC<CommandsListProps> = ({
         </div>
       )}
     </div>
-  )
-}
+  );
+};

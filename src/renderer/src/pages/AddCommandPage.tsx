@@ -1,20 +1,20 @@
-import React, { useState } from 'react'
-import { useAlert } from '../hooks/useAlert'
-import { Command } from '../types/command'
-import cmdForgeLogo from '../../../../resources/CmdForgeLogo.png'
+import React, { useState } from "react";
+import { useAlert } from "../hooks/useAlert";
+import { Command } from "../types/command";
+import cmdForgeLogo from "../../../../resources/CmdForgeLogo.png";
 
 interface AddCommandPageProps {
-  editing?: Command
-  groups: string[]
-  onSave: (cmd: Command) => Promise<boolean>
-  onDelete?: (id: number) => void
-  onBack: () => void
-  onReset: () => void
-  onFormCleared?: () => void
-  stayOnTop: boolean
-  onSetStayOnTop: (v: boolean) => void
-  onGroupRename?: (oldName: string, newName: string) => Promise<void>
-  onGroupDelete?: (groupName: string) => Promise<void>
+  editing?: Command;
+  groups: string[];
+  onSave: (cmd: Command) => Promise<boolean>;
+  onDelete?: (id: number) => void;
+  onBack: () => void;
+  onReset: () => void;
+  onFormCleared?: () => void;
+  stayOnTop: boolean;
+  onSetStayOnTop: (v: boolean) => void;
+  onGroupRename?: (oldName: string, newName: string) => Promise<void>;
+  onGroupDelete?: (groupName: string) => Promise<void>;
 }
 
 export const AddCommandPage: React.FC<AddCommandPageProps> = ({
@@ -30,13 +30,13 @@ export const AddCommandPage: React.FC<AddCommandPageProps> = ({
   onGroupRename,
   onGroupDelete
 }) => {
-  const [commandText, setCommandText] = useState(editing?.command || '')
-  const [description, setDescription] = useState(editing?.description || '')
-  const [groupName, setGroupName] = useState(editing?.groupName || '')
-  const [renameOldGroup, setRenameOldGroup] = useState<string>(editing?.groupName || '')
-  const [renameNewGroup, setRenameNewGroup] = useState<string>('')
-  const [deleteGroupName, setDeleteGroupName] = useState<string>(editing?.groupName || '')
-  const { showCustomAlert } = useAlert()
+  const [commandText, setCommandText] = useState(editing?.command || "");
+  const [description, setDescription] = useState(editing?.description || "");
+  const [groupName, setGroupName] = useState(editing?.groupName || "");
+  const [renameOldGroup, setRenameOldGroup] = useState<string>(editing?.groupName || "");
+  const [renameNewGroup, setRenameNewGroup] = useState<string>("");
+  const [deleteGroupName, setDeleteGroupName] = useState<string>(editing?.groupName || "");
+  const { showCustomAlert } = useAlert();
 
   const handleSaveClick = async (): Promise<void> => {
     const success = await onSave({
@@ -44,50 +44,50 @@ export const AddCommandPage: React.FC<AddCommandPageProps> = ({
       command: commandText,
       description,
       groupName
-    })
+    });
     // Clear form fields after successful save (only when creating new command)
     if (success && !editing) {
-      setCommandText('')
-      setDescription('')
-      setGroupName('')
-      onFormCleared?.()
+      setCommandText("");
+      setDescription("");
+      setGroupName("");
+      onFormCleared?.();
     }
-  }
+  };
 
   const handleReset = (): void => {
-    setCommandText(editing?.command || '')
-    setDescription(editing?.description || '')
-    setGroupName(editing?.groupName || '')
-    onReset()
-  }
+    setCommandText(editing?.command || "");
+    setDescription(editing?.description || "");
+    setGroupName(editing?.groupName || "");
+    onReset();
+  };
 
   React.useEffect(() => {
-    setRenameOldGroup(editing?.groupName || '')
-    setDeleteGroupName('')
-  }, [editing])
+    setRenameOldGroup(editing?.groupName || "");
+    setDeleteGroupName("");
+  }, [editing]);
 
   const handleRenameClick = async (): Promise<void> => {
     if (!renameNewGroup) {
-      showCustomAlert('Missing new group name')
-      return
+      showCustomAlert("Missing new group name");
+      return;
     }
     if (renameOldGroup === renameNewGroup) {
-      showCustomAlert('New group name is the same as existing name')
-      return
+      showCustomAlert("New group name is the same as existing name");
+      return;
     }
-    if (!onGroupRename) return
-    await onGroupRename(renameOldGroup, renameNewGroup)
-    setRenameNewGroup('')
-  }
+    if (!onGroupRename) return;
+    await onGroupRename(renameOldGroup, renameNewGroup);
+    setRenameNewGroup("");
+  };
 
   const handleDeleteClick = async (): Promise<void> => {
     if (!deleteGroupName) {
-      showCustomAlert('Please select a group to delete')
-      return
+      showCustomAlert("Please select a group to delete");
+      return;
     }
-    if (!onGroupDelete) return
-    await onGroupDelete(deleteGroupName)
-  }
+    if (!onGroupDelete) return;
+    await onGroupDelete(deleteGroupName);
+  };
 
   return (
     <div className="add-screen">
@@ -115,10 +115,10 @@ export const AddCommandPage: React.FC<AddCommandPageProps> = ({
                     type="checkbox"
                     checked={stayOnTop}
                     onChange={(e) => {
-                      const v = e.target.checked
-                      onSetStayOnTop(v)
+                      const v = e.target.checked;
+                      onSetStayOnTop(v);
                       // @ts-ignore - preload API
-                      window.api?.setAlwaysOnTop?.(v)
+                      window.api?.setAlwaysOnTop?.(v);
                     }}
                     aria-label="Stay on top"
                   />
@@ -128,13 +128,13 @@ export const AddCommandPage: React.FC<AddCommandPageProps> = ({
             </div>
           </div>
           <div className="add-header-inner">
-            <div className="add-header-title">{editing ? 'Edit Command' : 'Add New Command'}</div>
+            <div className="add-header-title">{editing ? "Edit Command" : "Add New Command"}</div>
             <div className="add-header-controls">
               <button className="back-button btn-primary" onClick={onBack}>
                 ← Back
               </button>
               <button className="btn-primary" onClick={handleSaveClick}>
-                {editing ? 'Update' : 'Save Command'}
+                {editing ? "Update" : "Save Command"}
               </button>
               {editing && onDelete && (
                 <button className="btn-delete-edit" onClick={() => onDelete(editing.id!)}>
@@ -142,7 +142,7 @@ export const AddCommandPage: React.FC<AddCommandPageProps> = ({
                 </button>
               )}
               <button className="btn-primary" onClick={handleReset}>
-                {editing ? 'Cancel' : 'Clear'}
+                {editing ? "Cancel" : "Clear"}
               </button>
             </div>
           </div>
@@ -150,7 +150,7 @@ export const AddCommandPage: React.FC<AddCommandPageProps> = ({
       </div>
       <div className="add-content">
         <div className="form-container">
-          <h2>{editing ? 'Edit Command' : 'Add New Command'}</h2>
+          <h2>{editing ? "Edit Command" : "Add New Command"}</h2>
 
           <div className="form-group">
             <label>Command</label>
@@ -233,7 +233,7 @@ export const AddCommandPage: React.FC<AddCommandPageProps> = ({
                   <button
                     className="btn-primary btn-small"
                     onClick={handleRenameClick}
-                    disabled={!renameNewGroup || renameNewGroup.trim() === ''}
+                    disabled={!renameNewGroup || renameNewGroup.trim() === ""}
                   >
                     Change
                   </button>
@@ -269,5 +269,5 @@ export const AddCommandPage: React.FC<AddCommandPageProps> = ({
         </div>
       </div>
     </div>
-  )
-}
+  );
+};

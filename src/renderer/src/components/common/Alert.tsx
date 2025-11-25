@@ -1,13 +1,13 @@
-import React from 'react'
+import React from "react";
 
 interface AlertProps {
-  show: boolean
-  message: string
-  onClose: () => void
+  show: boolean;
+  message: string;
+  onClose: () => void;
 }
 
 export const Alert: React.FC<AlertProps> = ({ show, message, onClose }) => {
-  if (!show) return null
+  if (!show) return null;
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -20,5 +20,5 @@ export const Alert: React.FC<AlertProps> = ({ show, message, onClose }) => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};

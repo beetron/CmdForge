@@ -1,20 +1,20 @@
-import React from 'react'
-import { Command } from '../types/command'
-import { CommandsList } from '../components/features/CommandsList'
-import { GroupFilter } from '../components/features/GroupFilter'
-import cmdForgeLogo from '../../../../resources/CmdForgeLogo.png'
+import React from "react";
+import { Command } from "../types/command";
+import { CommandsList } from "../components/features/CommandsList";
+import { GroupFilter } from "../components/features/GroupFilter";
+import cmdForgeLogo from "../../../../resources/CmdForgeLogo.png";
 
 interface ViewCommandsPageProps {
-  commands: Command[]
-  groups: string[]
-  groupFilter: string | undefined
-  onGroupFilterChange: (value: string | undefined) => void
-  onEdit: (cmd: Command) => void
-  onDelete: (id: number) => void
-  onCopy: (text: string, id: number) => void
-  copiedId: number | null
-  onBack: () => void
-  empty?: boolean
+  commands: Command[];
+  groups: string[];
+  groupFilter: string | undefined;
+  onGroupFilterChange: (value: string | undefined) => void;
+  onEdit: (cmd: Command) => void;
+  onDelete: (id: number) => void;
+  onCopy: (text: string, id: number) => void;
+  copiedId: number | null;
+  onBack: () => void;
+  empty?: boolean;
 }
 
 export const ViewCommandsPage: React.FC<ViewCommandsPageProps> = ({
@@ -57,5 +57,5 @@ export const ViewCommandsPage: React.FC<ViewCommandsPageProps> = ({
         />
       </div>
     </div>
-  )
-}
+  );
+};

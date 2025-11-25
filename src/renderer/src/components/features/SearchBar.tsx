@@ -1,9 +1,9 @@
-import React from 'react'
+import React from "react";
 
 interface SearchBarProps {
-  value: string
-  onChange: (value: string) => void
-  onFocus: () => void
+  value: string;
+  onChange: (value: string) => void;
+  onFocus: () => void;
 }
 
 export const SearchBar: React.FC<SearchBarProps> = ({ value, onChange, onFocus }) => {
@@ -17,5 +17,5 @@ export const SearchBar: React.FC<SearchBarProps> = ({ value, onChange, onFocus }
         onFocus={onFocus}
       />
     </div>
-  )
-}
+  );
+};

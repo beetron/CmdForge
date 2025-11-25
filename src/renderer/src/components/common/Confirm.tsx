@@ -1,14 +1,14 @@
-import React from 'react'
+import React from "react";
 
 interface ConfirmProps {
-  show: boolean
-  message: string
-  onConfirm: () => void
-  onCancel: () => void
+  show: boolean;
+  message: string;
+  onConfirm: () => void;
+  onCancel: () => void;
 }
 
 export const Confirm: React.FC<ConfirmProps> = ({ show, message, onConfirm, onCancel }) => {
-  if (!show) return null
+  if (!show) return null;
 
   return (
     <div className="modal-overlay" onClick={onCancel}>
@@ -24,5 +24,5 @@ export const Confirm: React.FC<ConfirmProps> = ({ show, message, onConfirm, onCa
         </div>
       </div>
     </div>
-  )
-}
+  );
+};

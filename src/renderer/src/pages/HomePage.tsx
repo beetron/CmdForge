@@ -1,28 +1,28 @@
-import React from 'react'
-import { Command } from '../types/command'
-import { SearchBar } from '../components/features/SearchBar'
-import { GroupFilter } from '../components/features/GroupFilter'
-import { SearchResults } from '../components/features/SearchResults'
-import { OptionsMenu } from '../components/common/OptionsMenu'
-import cmdForgeLogo from '../../../../resources/CmdForgeLogo.png'
+import React from "react";
+import { Command } from "../types/command";
+import { SearchBar } from "../components/features/SearchBar";
+import { GroupFilter } from "../components/features/GroupFilter";
+import { SearchResults } from "../components/features/SearchResults";
+import { OptionsMenu } from "../components/common/OptionsMenu";
+import cmdForgeLogo from "../../../../resources/CmdForgeLogo.png";
 
 interface HomePageProps {
-  search: string
-  setSearch: (value: string) => void
-  stayOnTop: boolean
-  onSetStayOnTop: (v: boolean) => void
-  groups: string[]
-  groupFilter: string | undefined
-  setGroupFilter: (value: string | undefined) => void
-  filteredSuggestions: Command[]
-  showSuggestions: boolean
-  copiedId: number | null
-  onCopy: (text: string, id: number) => void
-  onEdit: (cmd: Command) => void
-  onDelete: (id: number) => void
-  onAddClick: () => void
-  onExport: () => void
-  onImport: () => void
+  search: string;
+  setSearch: (value: string) => void;
+  stayOnTop: boolean;
+  onSetStayOnTop: (v: boolean) => void;
+  groups: string[];
+  groupFilter: string | undefined;
+  setGroupFilter: (value: string | undefined) => void;
+  filteredSuggestions: Command[];
+  showSuggestions: boolean;
+  copiedId: number | null;
+  onCopy: (text: string, id: number) => void;
+  onEdit: (cmd: Command) => void;
+  onDelete: (id: number) => void;
+  onAddClick: () => void;
+  onExport: () => void;
+  onImport: () => void;
 }
 
 export const HomePage: React.FC<HomePageProps> = ({
@@ -68,10 +68,10 @@ export const HomePage: React.FC<HomePageProps> = ({
                   type="checkbox"
                   checked={stayOnTop}
                   onChange={(e) => {
-                    const v = e.target.checked
-                    onSetStayOnTop(v)
+                    const v = e.target.checked;
+                    onSetStayOnTop(v);
                     // @ts-ignore - preload API
-                    window.api?.setAlwaysOnTop?.(v)
+                    window.api?.setAlwaysOnTop?.(v);
                   }}
                   aria-label="Stay on top"
                 />
@@ -112,7 +112,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default HomePage
+export default HomePage;
