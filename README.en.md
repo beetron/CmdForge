@@ -1,122 +1,66 @@
-# CmdForge<img src="resources/CmdForgeLogo.png" alt="CmdForge Logo" width="150" height="150">
+<img src="resources/CmdForgeLogo.png" alt="CmdForge Logo" width="150" height="150">
 
-Your personal command snippet manager with cloud sync and multi-language support.<br/># CmdForge
-
-(Windows 10/11, macOS)
+# CmdForge
 
 Your personal command snippet manager with cloud sync and multi-language support.<br/>
-
-[![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](https://www.python.org/)(Windows 10/11, macOS)
-
-[![Node.js](https://img.shields.io/badge/Node-20-339933?logo=node.js&logoColor=white)](https://nodejs.org/)<br/><br/>
-
-[![Electron](https://img.shields.io/badge/Electron-30.5.1-47848F?logo=electron&logoColor=white)](https://electronjs.org/)<img src="https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white">
-
-[![React](https://img.shields.io/badge/React-19.1.1-61DAFB?logo=react&logoColor=black)](https://reactjs.org/)<img src="https://img.shields.io/badge/Node-20-339933?logo=node.js&logoColor=white">
-
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.9.2-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)<img src="https://img.shields.io/badge/Electron-30.5.1-47848F?logo=electron&logoColor=white">
-
-[![Vite](https://img.shields.io/badge/Vite-7.1.6-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)<img src="https://img.shields.io/badge/React-19.1.1-61DAFB?logo=react&logoColor=black">
-
-[![Better SQLite3](https://img.shields.io/badge/Better%20SQLite3-12.4.6-003B57?logo=sqlite&logoColor=white)](https://github.com/WiseLibs/better-sqlite3)<img src="https://img.shields.io/badge/TypeScript-5.9.2-3178C6?logo=typescript&logoColor=white">
-
-[![Google APIs](https://img.shields.io/badge/Google%20APIs-166.0.0-4285F4?logo=google&logoColor=white)](https://developers.google.com/apis-explorer)<img src="https://img.shields.io/badge/Vite-7.1.6-646CFF?logo=vite&logoColor=white">
-
-[![Keytar](https://img.shields.io/badge/Keytar-7.9.0-000000?logo=npm&logoColor=white)](https://github.com/atom/node-keytar)<img src="https://img.shields.io/badge/Better%20SQLite3-12.4.6-003B57?logo=sqlite&logoColor=white">
-
+(Windows 10/11, macOS)
+<br/><br/>
+<img src="https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white">
+<img src="https://img.shields.io/badge/Node-20-339933?logo=node.js&logoColor=white">
+<img src="https://img.shields.io/badge/Electron-30.5.1-47848F?logo=electron&logoColor=white">
+<img src="https://img.shields.io/badge/React-19.1.1-61DAFB?logo=react&logoColor=black">
+<img src="https://img.shields.io/badge/TypeScript-5.9.2-3178C6?logo=typescript&logoColor=white">
+<img src="https://img.shields.io/badge/Vite-7.1.6-646CFF?logo=vite&logoColor=white">
+<img src="https://img.shields.io/badge/Better%20SQLite3-12.4.6-003B57?logo=sqlite&logoColor=white">
 <img src="https://img.shields.io/badge/Google%20APIs-166.0.0-4285F4?logo=google&logoColor=white">
+<img src="https://img.shields.io/badge/Keytar-7.9.0-000000?logo=npm&logoColor=white">
 
-## 📖 Documentation<img src="https://img.shields.io/badge/Keytar-7.9.0-000000?logo=npm&logoColor=white">
+## Table of Contents
 
-Choose your preferred language:## Table of Contents
-
-- [**English**](./README.en.md) - Complete documentation in English- [What is CmdForge?](#what-is-cmdforge)
-
-- [**日本語**](./README.ja.md) - 日本語での完全なドキュメント- [Key Features](#key-features)
-
+- [What is CmdForge?](#what-is-cmdforge)
+- [Key Features](#key-features)
 - [How to Use](#how-to-use)
-
-## 🚀 Quick Start - [Adding Commands](#adding-commands)
-
-- [Searching Commands](#searching-commands)
-
-````bash - [Editing Commands](#editing-commands)
-
-# Install dependencies  - [Export Commands](#export-commands-backup)
-
-npm install  - [Import Commands](#import-commands-restoreoverwrite)
-
+  - [Adding Commands](#adding-commands)
+  - [Searching Commands](#searching-commands)
+  - [Editing Commands](#editing-commands)
+  - [Export Commands](#export-commands-backup)
+  - [Import Commands](#import-commands-restoreoverwrite)
   - [Google Cloud Sync Setup](#google-cloud-sync-setup)
-
-# Start development server  - [Language Settings](#language-settings)
-
-npm run dev- [Development](#development)
-
-```  - [Recommended IDE Setup](#recommended-ide-setup)
-
+  - [Language Settings](#language-settings)
+- [Development](#development)
+  - [Recommended IDE Setup](#recommended-ide-setup)
   - [Project Setup](#project-setup)
-
-## ✨ Key Features  - [Building for Production](#building-for-production)
-
+  - [Building for Production](#building-for-production)
 - [Project Architecture](#project-architecture)
+- [License](#license)
 
-- **Command Management**: Store, organize, and search command snippets- [License](#license)
+## What is CmdForge?
 
-- **Google Cloud Sync**: Sync commands across devices using Google Sheets
-
-- **Multi-Language**: English and Japanese interface support## What is CmdForge?
-
-- **Cross-Platform**: Windows and macOS support
-
-- **Always On Top**: Keep CmdForge above other windowsCmdForge is a command snippet manager built with Electron, React, and TypeScript. It helps developers and system administrators store, organize, search, and quickly access frequently used commands. Instead of searching through documentation or terminal history, you can keep all your commands organized in groups, searchable, and easily shareable.
-
-- **Import/Export**: Backup and restore your command library
+CmdForge is a command snippet manager built with Electron, React, and TypeScript. It helps developers and system administrators store, organize, search, and quickly access frequently used commands. Instead of searching through documentation or terminal history, you can keep all your commands organized in groups, searchable, and easily shareable.
 
 CmdForge features cloud synchronization with Google Sheets for cross-device access and supports multiple languages (English and Japanese) for international users.
 
-## 📋 Requirements
-
 ## Key Features
 
-- **Python**: 3.11 or below (for Better SQLite3 compilation)
-
-- **Node.js**: 20 or below (for Better SQLite3 compatibility)- **Add Commands**: Store command snippets with descriptions and group them by category
-
+- **Add Commands**: Store command snippets with descriptions and group them by category
 - **Organize by Groups**: Create custom groups (e.g., Kubernetes, Docker, Git, etc.) to keep commands organized
-
-## 🏗️ Build- **Quick Search**: Real-time search with wildcard support to find commands instantly
-
+- **Quick Search**: Real-time search with wildcard support to find commands instantly
 - **Inline Search Results & Copy**: Search results appear inline on the Home page; click any command to copy with visual feedback (✓ Copied!)
-
-```bash- **Edit Commands**: Update existing commands and their descriptions; open the Add page to edit
-
-# Windows- **Delete Commands**: Remove commands via inline delete or from the Add/Edit screen
-
-npm run build:win- **Group Management**: Rename or delete groups from the Add Command page
-
+- **Edit Commands**: Update existing commands and their descriptions; open the Add page to edit
+- **Delete Commands**: Remove commands via inline delete or from the Add/Edit screen
+- **Group Management**: Rename or delete groups from the Add Command page
 - **Always On Top**: Toggle to keep the CmdForge window above other windows
-
-# macOS- **Google Cloud Sync**: Set up your own Google Cloud service account and sync commands with Google Sheets for cross-device access
-
-npm run build:mac- **Multi-Language Support**: Choose between English and Japanese interfaces with persistent language preferences
-
+- **Google Cloud Sync**: Set up your own Google Cloud service account and sync commands with Google Sheets for cross-device access
+- **Multi-Language Support**: Choose between English and Japanese interfaces with persistent language preferences
 - **Export Commands**: Backup all your commands to a JSON file
+- **Import Commands**: Load commands from a JSON file (overwrites existing data)
 
-# Linux- **Import Commands**: Load commands from a JSON file (overwrites existing data)
+## How to Use
 
-npm run build:linux
+<div style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 20px; background-color: #2d2d2d;">
 
-```## How to Use
+### Adding Commands
 
-
-
-## 📄 License<div style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 20px; background-color: #2d2d2d;">
-
-
-
-MIT</content>### Adding Commands
-
-<parameter name="filePath">c:\dev\CmdForge\README.md
 1. Click the **"Add Command"** button on the home page
 2. Enter the command text (e.g., `kubectl get pods`)
 3. Add a description explaining what the command does
@@ -192,8 +136,7 @@ Managing Groups:
 
 #### Example Workflow
 
-````
-
+```
 1. You have 50 personal commands stored
 2. Export them: "personal-commands.json" (backup)
 3. Import work commands: "work-commands.json"
@@ -202,8 +145,7 @@ Managing Groups:
 4. Later, import personal commands back: "personal-commands.json"
    → Your 75 work commands are deleted
    → Your 50 personal commands are restored
-
-````
+```
 
 </div>
 
@@ -315,7 +257,7 @@ Before setting up CmdForge, ensure you have the following installed:
 
 ```bash
 npm install
-````
+```
 
 #### Development Server
 
