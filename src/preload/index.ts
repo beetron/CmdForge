@@ -98,6 +98,13 @@ if (process.contextIsolated) {
       // Settings store
       settingsGet: (key: string) => ipcRenderer.invoke("settings-get", key),
       settingsSet: (key: string, value: unknown) => ipcRenderer.invoke("settings-set", key, value),
+      getSetting: async (key: string) => {
+        const result = await ipcRenderer.invoke("settings-get", key);
+        return result?.ok ? result.value : null;
+      },
+      saveSetting: async (key: string, value: unknown) => {
+        await ipcRenderer.invoke("settings-set", key, value);
+      },
       sheetsHasData: (sheetId: string) => ipcRenderer.invoke("sheets-has-data", sheetId),
       sheetsGetRows: (sheetId: string, range?: string) =>
         ipcRenderer.invoke("sheets-get-rows", sheetId, range),
@@ -167,6 +174,13 @@ if (process.contextIsolated) {
     // settings store
     settingsGet: (key: string) => ipcRenderer.invoke("settings-get", key),
     settingsSet: (key: string, value: unknown) => ipcRenderer.invoke("settings-set", key, value),
+    getSetting: async (key: string) => {
+      const result = await ipcRenderer.invoke("settings-get", key);
+      return result?.ok ? result.value : null;
+    },
+    saveSetting: async (key: string, value: unknown) => {
+      await ipcRenderer.invoke("settings-set", key, value);
+    },
     sheetsHasData: (sheetId: string) => ipcRenderer.invoke("sheets-has-data", sheetId),
     sheetsGetRows: (sheetId: string, range?: string) =>
       ipcRenderer.invoke("sheets-get-rows", sheetId, range),

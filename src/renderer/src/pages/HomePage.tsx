@@ -4,6 +4,7 @@ import { SearchBar } from "../components/features/SearchBar";
 import { GroupFilter } from "../components/features/GroupFilter";
 import { SearchResults } from "../components/features/SearchResults";
 import { OptionsMenu } from "../components/common/OptionsMenu";
+import { useTranslation } from "../contexts/I18nContext";
 import cmdForgeLogo from "../../../../resources/CmdForgeLogo.png";
 
 interface HomePageProps {
@@ -51,6 +52,8 @@ export const HomePage: React.FC<HomePageProps> = ({
   googleSyncEnabled,
   onSetGoogleSync
 }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="home-screen">
       <div className="home-header">
@@ -76,7 +79,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                   <path d="M20 17.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 16.25" />
                   <path d="M16 16l-4-4-4 4" />
                 </svg>
-                <span className="tooltip">Google Sync</span>
+                <span className="tooltip">{t("sync.googleSync")}</span>
               </div>
               <label className="switch">
                 <input
@@ -93,7 +96,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             </div>
             <div className="stay-toggle">
               <div className="stay-help" role="button" aria-label="Help: Stay on top">
-                ?<span className="tooltip">Window stay on top</span>
+                ?<span className="tooltip">{t("options.stayOnTop")}</span>
               </div>
               <label className="switch">
                 <input
@@ -124,7 +127,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
         <div className="action-row">
           <button className="btn-secondary add-btn" onClick={onAddClick}>
-            Add Command
+            {t("commands.add")}
           </button>
           <div className="action-right">
             <OptionsMenu

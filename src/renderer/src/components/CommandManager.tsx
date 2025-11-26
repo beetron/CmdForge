@@ -12,10 +12,12 @@ import { useConfirm } from "../hooks/useConfirm";
 import { useCopyToClipboard } from "../hooks/useCopyToClipboard";
 import { commandService } from "../services/commandService";
 import { Command } from "../types/command";
+import { useTranslation } from "../contexts/I18nContext";
 
 type ViewType = "home" | "add";
 
 export default function CommandManager(): React.JSX.Element {
+  const { t } = useTranslation();
   const [currentView, setCurrentView] = useState<ViewType>("home");
   const [groupFilter, setGroupFilter] = useState<string | undefined>(undefined);
   const [editing, setEditing] = useState<Command | null>(null);
@@ -60,11 +62,11 @@ export default function CommandManager(): React.JSX.Element {
 
   const handleSave = async (cmd: Command): Promise<boolean> => {
     if (!cmd.command?.trim()) {
-      showCustomAlert("Please enter a command");
+      showCustomAlert(t("messages.enterCommand"));
       return false;
     }
     if (!cmd.groupName?.trim()) {
-      showCustomAlert("Please select or enter a group name");
+      showCustomAlert(t("messages.selectOrEnterGroup"));
       return false;
     }
 
@@ -77,7 +79,7 @@ export default function CommandManager(): React.JSX.Element {
       });
       // keep the page in edit mode and update the editing state
       setEditing(updated);
-      showCustomAlert("Updated!");
+      showCustomAlert(t("messages.updated"));
       await loadCommands();
 
       // Trigger sync if enabled
@@ -92,7 +94,7 @@ export default function CommandManager(): React.JSX.Element {
         description: cmd.description,
         groupName: cmd.groupName
       });
-      showCustomAlert("Saved!");
+      showCustomAlert(t("messages.saved"));
       resetForm();
       await loadCommands();
 
@@ -111,10 +113,10 @@ export default function CommandManager(): React.JSX.Element {
   };
 
   const handleDelete = async (id: number): Promise<void> => {
-    showCustomConfirm("Are you sure you want to delete this command?", async () => {
+    showCustomConfirm(t("messages.confirmDelete"), async () => {
       const res = await commandService.deleteCommand(id);
       if (!res || !res.ok) {
-        showCustomAlert("Failed to delete command");
+        showCustomAlert(t("messages.failedToDelete"));
         return;
       }
       await loadCommands();
@@ -134,20 +136,20 @@ export default function CommandManager(): React.JSX.Element {
   const handleExport = async (): Promise<void> => {
     const res = await commandService.exportData();
     if (!res || res.cancelled) {
-      showCustomAlert("Export cancelled");
+      // User cancelled, no alert needed
     } else {
-      showCustomAlert("Exported to " + (res.filePath || "file"));
+      showCustomAlert(t("messages.exportedTo", { filePath: res.filePath || "file" }));
     }
   };
 
   const handleImport = async (): Promise<void> => {
     const res = await commandService.importData();
     if (!res || res.cancelled) {
-      showCustomAlert("Import cancelled");
+      // User cancelled, no alert needed
     } else if (res.error) {
-      showCustomAlert("Import error: " + res.error);
+      showCustomAlert(t("messages.importError", { error: res.error }));
     } else {
-      showCustomAlert(`Imported ${res.count ?? 0} commands`);
+      showCustomAlert(t("messages.importedCount", { count: String(res.count ?? 0) }));
       await loadCommands();
 
       // Trigger sync if enabled
@@ -159,18 +161,18 @@ export default function CommandManager(): React.JSX.Element {
 
   const handleRenameGroup = async (oldName: string, newName: string): Promise<void> => {
     if (!oldName || !newName) {
-      showCustomAlert("Please select a group and enter a new group name");
+      showCustomAlert(t("messages.selectGroupAndEnterName"));
       return;
     }
     if (oldName === newName) {
-      showCustomAlert("New group name is the same as the existing one");
+      showCustomAlert(t("messages.sameGroupName"));
       return;
     }
     const res = await commandService.renameGroup(oldName, newName);
     if (!res || !res.ok) {
-      showCustomAlert(res?.message ?? "Rename failed");
+      showCustomAlert(res?.message ?? t("messages.renameFailed"));
     } else {
-      showCustomAlert("Group renamed");
+      showCustomAlert(t("messages.groupRenamed"));
       await loadCommands();
       // If we're editing a command which used the old group, update its groupName
       setEditing((prev) =>
@@ -181,39 +183,36 @@ export default function CommandManager(): React.JSX.Element {
 
   const handleDeleteGroup = (groupName: string): Promise<void> => {
     if (!groupName) {
-      showCustomAlert("Please select a group to delete");
+      showCustomAlert(t("messages.selectGroupToDelete"));
       return Promise.resolve();
     }
     return new Promise((resolve) => {
-      showCustomConfirm(
-        "Deleting the Group will delete any commands in the same group",
-        async () => {
-          const res = await commandService.deleteGroup(groupName);
-          if (!res || !res.ok) {
-            showCustomAlert(res?.message ?? "Failed to delete group");
-            resolve();
-          } else {
-            showCustomAlert("Group deleted");
-            await loadCommands();
-            // If the user was editing a command in that group, reset the form and return to home
-            resetForm();
-            setCurrentView("home");
-            resolve();
-          }
+      showCustomConfirm(t("messages.confirmDeleteGroup"), async () => {
+        const res = await commandService.deleteGroup(groupName);
+        if (!res || !res.ok) {
+          showCustomAlert(res?.message ?? t("messages.failedToDeleteGroup"));
+          resolve();
+        } else {
+          showCustomAlert(t("messages.groupDeleted"));
+          await loadCommands();
+          // If the user was editing a command in that group, reset the form and return to home
+          resetForm();
+          setCurrentView("home");
+          resolve();
         }
-      );
+      });
     });
   };
 
   const handleDeleteAll = (): Promise<void> => {
     return new Promise((resolve) => {
-      showCustomConfirm("Delete all commands?", async () => {
+      showCustomConfirm(t("messages.confirmDeleteAll"), async () => {
         const res = await commandService.deleteAll();
         if (!res || !res.ok) {
-          showCustomAlert(res?.message ?? "Delete all failed");
+          showCustomAlert(res?.message ?? t("messages.deleteAllFailed"));
           resolve();
         } else {
-          showCustomAlert("All commands deleted");
+          showCustomAlert(t("messages.allDeleted"));
           await loadCommands();
           resetForm();
           setCurrentView("home");
@@ -346,7 +345,7 @@ export default function CommandManager(): React.JSX.Element {
           } else {
             const errorMsg = "error" in syncResult ? syncResult.error : "Unknown error";
             console.error("Sync failed:", errorMsg);
-            showCustomAlert(`Sync failed: ${errorMsg || "Unknown error"}`);
+            showCustomAlert(t("messages.syncFailed", { error: errorMsg || "Unknown error" }));
           }
         }
       } catch (err) {
@@ -366,7 +365,7 @@ export default function CommandManager(): React.JSX.Element {
         <div className="sync-overlay">
           <div className="sync-spinner">
             <div className="spinner"></div>
-            <p>Syncing with Google Sheets...</p>
+            <p>{t("messages.syncingWithGoogleSheets")}</p>
           </div>
         </div>
       )}
@@ -441,7 +440,7 @@ export default function CommandManager(): React.JSX.Element {
           setGoogleKey(null);
           setGoogleSheetId(null);
           setGoogleSyncEnabled(false);
-          showCustomAlert("Google Sync data deleted and sync disabled");
+          showCustomAlert(t("messages.googleSyncDeleted"));
         }}
       />
     </div>

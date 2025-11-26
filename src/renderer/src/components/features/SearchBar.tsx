@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "../../contexts/I18nContext";
 
 interface SearchBarProps {
   value: string;
@@ -7,12 +8,14 @@ interface SearchBarProps {
 }
 
 export const SearchBar: React.FC<SearchBarProps> = ({ value, onChange, onFocus }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="search-container">
       <input
         className="search-input"
         value={value}
-        placeholder="Search... * for all commands"
+        placeholder={t("app.search")}
         onChange={(e) => onChange(e.target.value)}
         onFocus={onFocus}
       />

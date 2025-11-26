@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from "../../contexts/I18nContext";
+import { LanguageModal } from "./LanguageModal";
 
 interface OptionsMenuProps {
   onExport: () => void;
@@ -14,7 +16,9 @@ export const OptionsMenu: React.FC<OptionsMenuProps> = ({
   onDeleteAll
 }) => {
   const [open, setOpen] = useState(false);
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
   const ref = useRef<HTMLDivElement | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const onClick = (e: MouseEvent): void => {
@@ -46,10 +50,10 @@ export const OptionsMenu: React.FC<OptionsMenuProps> = ({
           stroke="currentColor"
           strokeWidth="1.5"
         >
-          <path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4z"></path>
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09c.7 0 1.24-.44 1.51-1A1.65 1.65 0 0 0 4.6 6.6l-.06-.06A2 2 0 1 1 7.37 3.7l.06.06c.27.3.82.46 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09c.7 0 1.24.44 1.51 1A1.65 1.65 0 0 0 16.4 5l.06.06a2 2 0 1 1 2.83 2.83l-.06.06c-.18.18-.24.44-.33.7.06.27.18.52.33.7z"></path>
+          <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path>
+          <path d="M10.5 1.5h3a.5.5 0 0 1 .5.5v1.63a6 6 0 0 1 1.95 1.12l1.15-1.15a.5.5 0 0 1 .707 0l2.121 2.121a.5.5 0 0 1 0 .707l-1.15 1.15a6 6 0 0 1 1.12 1.95h1.63a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-.5.5h-1.63a6 6 0 0 1-1.12 1.95l1.15 1.15a.5.5 0 0 1 0 .707l-2.121 2.121a.5.5 0 0 1-.707 0l-1.15-1.15a6 6 0 0 1-1.95 1.12v1.63a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1.63a6 6 0 0 1-1.95-1.12l-1.15 1.15a.5.5 0 0 1-.707 0L2.379 19.37a.5.5 0 0 1 0-.707l1.15-1.15a6 6 0 0 1-1.12-1.95H1a.5.5 0 0 1-.5-.5v-3a.5.5 0 0 1 .5-.5h1.63a6 6 0 0 1 1.12-1.95l-1.15-1.15a.5.5 0 0 1 0-.707L5.121 5.75a.5.5 0 0 1 .707 0l1.15 1.15a6 6 0 0 1 1.95-1.12V2a.5.5 0 0 1 .5-.5z"></path>
         </svg>
-        Options ▾
+        {t("options.menu")} ▾
       </button>
       {open && (
         <div className="options-dropdown">
@@ -80,7 +84,7 @@ export const OptionsMenu: React.FC<OptionsMenuProps> = ({
               <path d="M20 17.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 16.25" />
               <path d="M16 16l-4-4-4 4" />
             </svg>
-            Google Sync
+            {t("sync.googleSync")}
           </div>
           <div
             className="options-item"
@@ -110,7 +114,7 @@ export const OptionsMenu: React.FC<OptionsMenuProps> = ({
               <polyline points="7 10 12 15 17 10" />
               <line x1="12" y1="15" x2="12" y2="3" />
             </svg>
-            Export
+            {t("options.export")}
           </div>
 
           <div
@@ -141,7 +145,7 @@ export const OptionsMenu: React.FC<OptionsMenuProps> = ({
               <line x1="12" y1="3" x2="12" y2="17" />
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
             </svg>
-            Import
+            {t("options.import")}
           </div>
 
           <div
@@ -173,10 +177,43 @@ export const OptionsMenu: React.FC<OptionsMenuProps> = ({
               <line x1="10" y1="11" x2="10" y2="17" />
               <line x1="14" y1="11" x2="14" y2="17" />
             </svg>
-            Delete All
+            {t("options.deleteAll")}
+          </div>
+
+          {/* Language selector */}
+          <div
+            className="options-item"
+            role="button"
+            tabIndex={0}
+            onClick={() => {
+              setOpen(false);
+              setShowLanguageModal(true);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                setOpen(false);
+                setShowLanguageModal(true);
+              }
+            }}
+          >
+            <svg
+              className="options-item-icon"
+              viewBox="0 0 24 24"
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="2" y1="12" x2="22" y2="12" />
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+            </svg>
+            {t("options.language")}
           </div>
         </div>
       )}
+      <LanguageModal show={showLanguageModal} onClose={() => setShowLanguageModal(false)} />
     </div>
   );
 };

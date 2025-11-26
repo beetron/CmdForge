@@ -71,6 +71,8 @@ declare global {
         key: string,
         value: unknown
       ) => Promise<{ ok: boolean; error?: string } | { ok: false; error?: string }>;
+      getSetting: (key: string) => Promise<string | null>;
+      saveSetting: (key: string, value: unknown) => Promise<void>;
       sheetsHasData: (
         sheetId: string
       ) => Promise<{ ok: boolean; hasData: boolean } | { ok: false; error?: string }>;

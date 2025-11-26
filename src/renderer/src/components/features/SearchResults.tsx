@@ -1,5 +1,6 @@
 import React from "react";
 import { Command } from "../../types/command";
+import { useTranslation } from "../../contexts/I18nContext";
 
 interface SearchResultsProps {
   suggestions: Command[];
@@ -16,6 +17,8 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
   onEdit,
   onDelete
 }) => {
+  const { t } = useTranslation();
+
   if (suggestions.length === 0) return null;
 
   return (
@@ -38,7 +41,9 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
               </div>
             </div>
             <div className="suggestion-actions">
-              {copiedId === cmd.id && <span className="copied-indicator">✓ Copied!</span>}
+              {copiedId === cmd.id && (
+                <span className="copied-indicator">✓ {t("messages.copiedToClipboard")}</span>
+              )}
               <button
                 className="btn-edit suggestion-edit-btn"
                 onClick={(e) => {
@@ -46,7 +51,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                   onEdit(cmd);
                 }}
               >
-                Edit
+                {t("commands.edit")}
               </button>
               <button
                 className="btn-delete suggestion-edit-btn"
@@ -55,7 +60,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                   onDelete(cmd.id!);
                 }}
               >
-                Delete
+                {t("commands.delete")}
               </button>
             </div>
           </div>

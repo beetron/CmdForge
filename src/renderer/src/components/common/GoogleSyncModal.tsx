@@ -5,6 +5,7 @@ import {
   getSheetIdFromStorage,
   deleteDataFromStorage
 } from "../../utils/keytarStorage";
+import { useTranslation } from "../../contexts/I18nContext";
 
 interface GoogleSyncModalProps {
   show: boolean;
@@ -19,6 +20,7 @@ export const GoogleSyncModal: React.FC<GoogleSyncModalProps> = ({
   onSaved,
   onDeleted
 }) => {
+  const { t } = useTranslation();
   const [loadedFileName, setLoadedFileName] = useState<string | null>(null);
   const [loadedContent, setLoadedContent] = useState<string | null>(null);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
@@ -76,7 +78,7 @@ export const GoogleSyncModal: React.FC<GoogleSyncModalProps> = ({
       const fileName = fp ? fp.replace(/^.*[\\/]/, "") : null;
       // Validate base filename must be credentials.json
       if (fileName !== "credentials.json") {
-        setLoadWarning("Invalid key file - must be credentials.json");
+        setLoadWarning(t("googleSyncModal.invalidKeyFile"));
         setLoadedFileName(null);
         setLoadedContent(null);
         return;
@@ -87,21 +89,21 @@ export const GoogleSyncModal: React.FC<GoogleSyncModalProps> = ({
       setSaveMessage(null);
     } catch (err) {
       console.error("Load key failed", err);
-      setSaveMessage("Failed to load key");
+      setSaveMessage(t("googleSyncModal.failedToLoadKey"));
     }
   };
 
   const handleDeleteData = async (): Promise<void> => {
     const res = await deleteDataFromStorage();
     if (res && res.ok) {
-      setSaveMessage("Deleted");
+      setSaveMessage(t("googleSyncModal.deleted"));
       setShowDeletedConfirm(true);
       setLoadedContent(null);
       setLoadedFileName(null);
       setSheetId(null);
       setSavedSheetId(null);
       onDeleted?.();
-    } else setSaveMessage(res?.error ?? "Delete failed");
+    } else setSaveMessage(res?.error ?? t("googleSyncModal.deleteFailed"));
   };
 
   const handleSaveKey = async (): Promise<void> => {
@@ -109,26 +111,29 @@ export const GoogleSyncModal: React.FC<GoogleSyncModalProps> = ({
     try {
       const res = await saveKeyToStorage(loadedContent, sheetId ?? undefined);
       if (res.ok) {
-        let savedMsg = "Saved!";
-        if (res.keyChunked) savedMsg = `Saved (chunked, parts: ${res.keyParts ?? "?"})`;
-        if (res.keyFallbackPath) savedMsg = `Saved (fallback: ${res.keyFallbackPath})`;
+        let savedMsg = t("googleSyncModal.saved");
+        if (res.keyChunked)
+          savedMsg = t("googleSyncModal.savedChunked", { parts: String(res.keyParts ?? "?") });
+        if (res.keyFallbackPath)
+          savedMsg = t("googleSyncModal.savedFallback", { path: res.keyFallbackPath });
         setSaveMessage(savedMsg);
         setShowSavedConfirm(true);
         onSaved?.();
-        if (res.keyOk) setLoadedFileName("Stored");
+        if (res.keyOk) setLoadedFileName(t("googleSyncModal.stored"));
         if (res.sheetOk && sheetId) setSavedSheetId(sheetId);
         setLoadWarning(null);
       } else {
-        let msg = "Save failed";
+        let msg = t("googleSyncModal.saveFailed");
         if (res.error) msg += `: ${res.error}`;
-        if (res.keyOk === false) msg += " (key save failed)";
-        if (res.sheetOk === false) msg += " (sheet save failed)";
-        if (res.keyFallbackPath) msg += ` - saved to fallback: ${res.keyFallbackPath}`;
+        if (res.keyOk === false) msg += t("googleSyncModal.keySaveFailed");
+        if (res.sheetOk === false) msg += t("googleSyncModal.sheetSaveFailed");
+        if (res.keyFallbackPath)
+          msg += ` - ${t("googleSyncModal.savedFallback", { path: res.keyFallbackPath })}`;
         setSaveMessage(msg);
       }
     } catch (err) {
       console.error("Save key failed", err);
-      setSaveMessage("Save failed");
+      setSaveMessage(t("googleSyncModal.saveFailed"));
     }
   };
 
@@ -138,37 +143,37 @@ export const GoogleSyncModal: React.FC<GoogleSyncModalProps> = ({
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content google-sync-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-message">
-          <h2>Google Sync</h2>
-          <p>Syncing requires a premade Google Sheet and a Google API Service Account key.</p>
+          <h2>{t("googleSyncModal.title")}</h2>
+          <p>{t("googleSyncModal.description")}</p>
           <br />
           <ol>
-            <li>Create new Project</li>
-            <li>Create a Google API Service Account</li>
-            <li>Enable API: Google Sheets API, Google Drive API</li>
-            <li>Download the Service Account key (JSON)</li>
-            <li>Create a dedicated Google Sheet for CmdForge</li>
-            <li>Share the Google Sheet with the service account email</li>
-            <li>Copy the Google Sheet ID</li>
+            <li>{t("googleSyncModal.steps.1")}</li>
+            <li>{t("googleSyncModal.steps.2")}</li>
+            <li>{t("googleSyncModal.steps.3")}</li>
+            <li>{t("googleSyncModal.steps.4")}</li>
+            <li>{t("googleSyncModal.steps.5")}</li>
+            <li>{t("googleSyncModal.steps.6")}</li>
+            <li>{t("googleSyncModal.steps.7")}</li>
           </ol>
         </div>
         {loadWarning && <div className="modal-warning">{loadWarning}</div>}
         <div className="modal-actions">
           <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
             <button className="btn-primary btn-small" onClick={handleLoadKey}>
-              Attach Key
+              {t("googleSyncModal.attachKey")}
             </button>
             <button
               className="btn-primary btn-small"
               onClick={handleSaveKey}
               disabled={!loadedContent || !sheetId}
             >
-              Save
+              {t("googleSyncModal.saveKey")}
             </button>
             <button className="btn-primary btn-small" onClick={handleDeleteData}>
-              Delete Data
+              {t("googleSyncModal.deleteData")}
             </button>
             <button className="btn-primary btn-small" onClick={onClose}>
-              Close
+              {t("googleSyncModal.close")}
             </button>
             {/* Dev-only Inspect button hidden by default */}
           </div>
@@ -176,27 +181,34 @@ export const GoogleSyncModal: React.FC<GoogleSyncModalProps> = ({
         {/* sheet input centered under actions */}
         <div className="sheet-input-row" style={{ justifyContent: "center", marginTop: 8 }}>
           <input
-            placeholder="Enter Google Sheet ID"
+            placeholder={t("googleSyncModal.sheetIdPlaceholder")}
             value={sheetId ?? ""}
             onChange={(e) => setSheetId(e.target.value)}
             style={{ width: 360 }}
           />
         </div>
         <div style={{ marginTop: 12 }}>
-          <div>Key: {loadedFileName ?? "None"}</div>
-          <div>Sheet ID: {savedSheetId ?? "None"}</div>
+          <div>
+            {t("googleSyncModal.keyLabel")} {loadedFileName ?? t("googleSyncModal.none")}
+          </div>
+          <div>
+            {t("googleSyncModal.sheetIdLabel")} {savedSheetId ?? t("googleSyncModal.none")}
+          </div>
           {saveMessage && <div style={{ marginTop: 8 }}>{saveMessage}</div>}
           <div style={{ marginTop: 8 }}>
             <small>
-              Auto-sync is <strong>{googleSyncEnabled ? "enabled" : "disabled"}</strong> — toggle it
-              in the header.
+              {t("googleSyncModal.autoSyncStatus", {
+                status: googleSyncEnabled
+                  ? t("googleSyncModal.enabled")
+                  : t("googleSyncModal.disabled")
+              })}
             </small>
           </div>
           {/* debugInfo removed */}
           {showSavedConfirm && (
             <div className="modal-confirmation">
               <div className="modal-confirmation-card">
-                <div>Saved!</div>
+                <div>{t("googleSyncModal.saved")}</div>
                 <div style={{ marginTop: 8 }}>
                   <button
                     className="btn-primary btn-small"
@@ -205,7 +217,7 @@ export const GoogleSyncModal: React.FC<GoogleSyncModalProps> = ({
                       onClose();
                     }}
                   >
-                    OK
+                    {t("googleSyncModal.ok")}
                   </button>
                 </div>
               </div>
@@ -214,7 +226,7 @@ export const GoogleSyncModal: React.FC<GoogleSyncModalProps> = ({
           {showDeletedConfirm && (
             <div className="modal-confirmation">
               <div className="modal-confirmation-card">
-                <div>Deleted</div>
+                <div>{t("googleSyncModal.deleted")}</div>
                 <div style={{ marginTop: 8 }}>
                   <button
                     className="btn-primary btn-small"
@@ -223,7 +235,7 @@ export const GoogleSyncModal: React.FC<GoogleSyncModalProps> = ({
                       onClose();
                     }}
                   >
-                    OK
+                    {t("googleSyncModal.ok")}
                   </button>
                 </div>
               </div>

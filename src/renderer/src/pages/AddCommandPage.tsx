@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useAlert } from "../hooks/useAlert";
+import { useTranslation } from "../contexts/I18nContext";
 import { Command } from "../types/command";
 import cmdForgeLogo from "../../../../resources/CmdForgeLogo.png";
 
@@ -41,6 +42,7 @@ export const AddCommandPage: React.FC<AddCommandPageProps> = ({
   const [renameNewGroup, setRenameNewGroup] = useState<string>("");
   const [deleteGroupName, setDeleteGroupName] = useState<string>(editing?.groupName || "");
   const { showCustomAlert } = useAlert();
+  const { t } = useTranslation();
 
   const handleSaveClick = async (): Promise<void> => {
     const success = await onSave({
@@ -72,11 +74,11 @@ export const AddCommandPage: React.FC<AddCommandPageProps> = ({
 
   const handleRenameClick = async (): Promise<void> => {
     if (!renameNewGroup) {
-      showCustomAlert("Missing new group name");
+      showCustomAlert(t("addCommand.missingNewGroupName"));
       return;
     }
     if (renameOldGroup === renameNewGroup) {
-      showCustomAlert("New group name is the same as existing name");
+      showCustomAlert(t("addCommand.sameGroupName"));
       return;
     }
     if (!onGroupRename) return;
@@ -86,7 +88,7 @@ export const AddCommandPage: React.FC<AddCommandPageProps> = ({
 
   const handleDeleteClick = async (): Promise<void> => {
     if (!deleteGroupName) {
-      showCustomAlert("Please select a group to delete");
+      showCustomAlert(t("addCommand.selectGroupToDelete"));
       return;
     }
     if (!onGroupDelete) return;
@@ -109,7 +111,7 @@ export const AddCommandPage: React.FC<AddCommandPageProps> = ({
                 <div
                   className="google-help"
                   role="button"
-                  title="Google Sync"
+                  title={t("sync.googleSync")}
                   aria-label="Help: Google Sync"
                 >
                   G
@@ -131,7 +133,7 @@ export const AddCommandPage: React.FC<AddCommandPageProps> = ({
                 <div
                   className="stay-help"
                   role="button"
-                  title="Window stay on top"
+                  title={t("options.stayOnTop")}
                   aria-label="Help: Stay on top"
                 >
                   ?
@@ -154,21 +156,23 @@ export const AddCommandPage: React.FC<AddCommandPageProps> = ({
             </div>
           </div>
           <div className="add-header-inner">
-            <div className="add-header-title">{editing ? "Edit Command" : "Add New Command"}</div>
+            <div className="add-header-title">
+              {editing ? t("addCommand.editTitle") : t("addCommand.title")}
+            </div>
             <div className="add-header-controls">
               <button className="back-button btn-primary" onClick={onBack}>
-                ← Back
+                ← {t("addCommand.back")}
               </button>
               <button className="btn-primary" onClick={handleSaveClick}>
-                {editing ? "Update" : "Save Command"}
+                {editing ? t("addCommand.update") : t("addCommand.save")}
               </button>
               {editing && onDelete && (
                 <button className="btn-delete-edit" onClick={() => onDelete(editing.id!)}>
-                  Delete
+                  {t("commands.delete")}
                 </button>
               )}
               <button className="btn-primary" onClick={handleReset}>
-                {editing ? "Cancel" : "Clear"}
+                {t("addCommand.clear")}
               </button>
             </div>
           </div>
@@ -176,23 +180,23 @@ export const AddCommandPage: React.FC<AddCommandPageProps> = ({
       </div>
       <div className="add-content">
         <div className="form-container">
-          <h2>{editing ? "Edit Command" : "Add New Command"}</h2>
+          <h2>{editing ? t("addCommand.editTitle") : t("addCommand.title")}</h2>
 
           <div className="form-group">
-            <label>Command</label>
+            <label>{t("commands.command")}</label>
             <input
               className="input-command"
-              placeholder="e.g., kubectl get pods"
+              placeholder={t("addCommand.commandPlaceholder")}
               value={commandText}
               onChange={(e) => setCommandText(e.target.value)}
             />
           </div>
 
           <div className="form-group">
-            <label>Description</label>
+            <label>{t("commands.description")}</label>
             <textarea
               className="input-description"
-              placeholder="Describe what this command does..."
+              placeholder={t("addCommand.descriptionPlaceholder")}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
@@ -200,7 +204,7 @@ export const AddCommandPage: React.FC<AddCommandPageProps> = ({
           </div>
 
           <div className="form-group">
-            <label>Group</label>
+            <label>{t("commands.group")}</label>
             {groups.length > 0 ? (
               <div className="group-input-row">
                 <select
@@ -208,7 +212,7 @@ export const AddCommandPage: React.FC<AddCommandPageProps> = ({
                   value={groupName}
                   onChange={(e) => setGroupName(e.target.value)}
                 >
-                  <option value="">Select group...</option>
+                  <option value="">{t("commands.noGroup")}</option>
                   {groups.map((g) => (
                     <option key={g} value={g}>
                       {g}
@@ -218,7 +222,7 @@ export const AddCommandPage: React.FC<AddCommandPageProps> = ({
                 <span className="group-or">or</span>
                 <input
                   className="input-group-text"
-                  placeholder="New group name"
+                  placeholder={t("addCommand.groupPlaceholder")}
                   value={groupName}
                   onChange={(e) => setGroupName(e.target.value)}
                 />
@@ -226,7 +230,7 @@ export const AddCommandPage: React.FC<AddCommandPageProps> = ({
             ) : (
               <input
                 className="input-group"
-                placeholder="e.g., Kubernetes, Docker, Git"
+                placeholder={t("addCommand.groupPlaceholder")}
                 value={groupName}
                 onChange={(e) => setGroupName(e.target.value)}
               />
@@ -236,14 +240,14 @@ export const AddCommandPage: React.FC<AddCommandPageProps> = ({
           {editing && (
             <div className="card-panel">
               <div className="form-group">
-                <label>Change Group Name</label>
+                <label>{t("groups.rename")}</label>
                 <div className="group-input-row">
                   <select
                     className="input-group-select"
                     value={renameOldGroup}
                     onChange={(e) => setRenameOldGroup(e.target.value)}
                   >
-                    <option value="">Select group...</option>
+                    <option value="">{t("commands.noGroup")}</option>
                     {groups.map((g) => (
                       <option key={g} value={g}>
                         {g}
@@ -252,7 +256,7 @@ export const AddCommandPage: React.FC<AddCommandPageProps> = ({
                   </select>
                   <input
                     className="input-group-text"
-                    placeholder="New group name"
+                    placeholder={t("groups.newName")}
                     value={renameNewGroup}
                     onChange={(e) => setRenameNewGroup(e.target.value)}
                   />
@@ -261,20 +265,20 @@ export const AddCommandPage: React.FC<AddCommandPageProps> = ({
                     onClick={handleRenameClick}
                     disabled={!renameNewGroup || renameNewGroup.trim() === ""}
                   >
-                    Change
+                    {t("modal.save")}
                   </button>
                 </div>
               </div>
 
               <div className="form-group">
-                <label>Delete Group</label>
+                <label>{t("groups.delete")}</label>
                 <div className="group-input-row">
                   <select
                     className="input-group-select input-group-select--small"
                     value={deleteGroupName}
                     onChange={(e) => setDeleteGroupName(e.target.value)}
                   >
-                    <option value="">Select group...</option>
+                    <option value="">{t("commands.noGroup")}</option>
                     {groups.map((g) => (
                       <option key={g} value={g}>
                         {g}
@@ -286,7 +290,7 @@ export const AddCommandPage: React.FC<AddCommandPageProps> = ({
                     onClick={handleDeleteClick}
                     disabled={!deleteGroupName}
                   >
-                    Delete
+                    {t("commands.delete")}
                   </button>
                 </div>
               </div>
