@@ -2,6 +2,8 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import en from "../locales/en.json";
 import ja from "../locales/ja.json";
 
+/* eslint-disable react-refresh/only-export-components */
+
 type Translations = typeof en;
 type Language = "en" | "ja";
 
