@@ -24,6 +24,9 @@ interface HomePageProps {
   onExport: () => void;
   onImport: () => void;
   onGoogleSync?: () => void;
+  onDeleteAll?: () => void;
+  googleSyncEnabled?: boolean;
+  onSetGoogleSync?: (v: boolean) => void;
 }
 
 export const HomePage: React.FC<HomePageProps> = ({
@@ -43,7 +46,10 @@ export const HomePage: React.FC<HomePageProps> = ({
   onAddClick,
   onExport,
   onImport,
-  onGoogleSync
+  onGoogleSync,
+  onDeleteAll,
+  googleSyncEnabled,
+  onSetGoogleSync
 }) => {
   return (
     <div className="home-screen">
@@ -56,6 +62,40 @@ export const HomePage: React.FC<HomePageProps> = ({
             CmdForge
           </h1>
           <div className="header-actions">
+            <div className="google-toggle">
+              <div
+                className="google-help"
+                role="button"
+                title="Toggle to enable automatic Google Sync on startup"
+                aria-label="Help: Google Sync"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  width="16"
+                  height="16"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  style={{ display: "block" }}
+                >
+                  <path d="M20 17.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 16.25" />
+                  <path d="M16 16l-4-4-4 4" />
+                </svg>
+                <span className="tooltip">Google Sync</span>
+              </div>
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  checked={Boolean(googleSyncEnabled)}
+                  onChange={(e) => {
+                    const v = e.target.checked;
+                    onSetGoogleSync?.(v);
+                  }}
+                  aria-label="Google Sync Enabled"
+                />
+                <span className="slider" />
+              </label>
+            </div>
             <div className="stay-toggle">
               <div
                 className="stay-help"
@@ -63,7 +103,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 title="Toggle to have window stay on top"
                 aria-label="Help: Stay on top"
               >
-                ? <span className="tooltip">Toggle to have window stay on top</span>
+                ? <span className="tooltip">Window stay on top</span>
               </div>
               <label className="switch">
                 <input
@@ -97,7 +137,12 @@ export const HomePage: React.FC<HomePageProps> = ({
             Add Command
           </button>
           <div className="action-right">
-            <OptionsMenu onExport={onExport} onImport={onImport} onGoogleSync={onGoogleSync} />
+            <OptionsMenu
+              onExport={onExport}
+              onImport={onImport}
+              onGoogleSync={onGoogleSync}
+              onDeleteAll={onDeleteAll}
+            />
           </div>
         </div>
       </div>

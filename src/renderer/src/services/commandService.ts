@@ -45,5 +45,8 @@ export const commandService = {
   },
   async deleteGroup(groupName: string): Promise<{ ok: boolean; message?: string }> {
     return window.api.deleteGroup(groupName);
+  },
+  async deleteAll(): Promise<{ ok: boolean; message?: string }> {
+    return window.api.deleteAll();
   }
 };

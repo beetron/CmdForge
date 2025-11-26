@@ -32,6 +32,7 @@ declare global {
       getAlwaysOnTop: () => Promise<boolean>;
       renameGroup: (oldName: string, newName: string) => Promise<{ ok: boolean; message?: string }>;
       deleteGroup: (groupName: string) => Promise<{ ok: boolean; message?: string }>;
+      deleteAll: () => Promise<{ ok: boolean; message?: string }>;
       loadGoogleKey: () => Promise<{
         canceled: boolean;
         filePath?: string;
@@ -40,15 +41,78 @@ declare global {
       saveGoogleKey: (content: string) => Promise<{ ok: boolean }>;
       encryptKey: (content: string) => Promise<string>;
       decryptKey: (base64: string) => Promise<string>;
-      keystoreSave: (base64: string) => Promise<{ ok: boolean; path?: string }>;
+      keystoreSave: (base64: string) => Promise<{
+        ok: boolean;
+        path?: string;
+        error?: string;
+        length?: number;
+        prefix?: string;
+        chunked?: boolean;
+        parts?: number;
+        fallbackPath?: string;
+      }>;
       keystoreLoad: () => Promise<{
         ok: boolean;
         content?: string | null;
+        error?: string;
       }>;
-      keystoreDelete: () => Promise<{ ok: boolean }>;
-      keystoreSaveSheet: (sheetId: string) => Promise<{ ok: boolean }>;
-      keystoreLoadSheet: () => Promise<{ ok: boolean; content?: string | null }>;
-      keystoreDeleteAll: () => Promise<{ ok: boolean }>;
+      keystoreDelete: () => Promise<{ ok: boolean; error?: string }>;
+      keystoreSaveSheet: (sheetId: string) => Promise<{ ok: boolean; error?: string }>;
+      keystoreLoadSheet: () => Promise<{
+        ok: boolean;
+        content?: string | null;
+        error?: string;
+      }>;
+      keystoreDeleteAll: () => Promise<{ ok: boolean; error?: string }>;
+      settingsGet: (
+        key: string
+      ) => Promise<{ ok: boolean; value?: unknown } | { ok: false; error?: string }>;
+      settingsSet: (
+        key: string,
+        value: unknown
+      ) => Promise<{ ok: boolean; error?: string } | { ok: false; error?: string }>;
+      sheetsHasData: (
+        sheetId: string
+      ) => Promise<{ ok: boolean; hasData: boolean } | { ok: false; error?: string }>;
+      sheetsGetRows: (
+        sheetId: string,
+        range?: string
+      ) => Promise<{ ok: boolean; rows: string[][] } | { ok: false; error?: string }>;
+      sheetsPushRows: (
+        sheetId: string,
+        range: string,
+        values: string[][]
+      ) => Promise<{ ok: boolean; updated?: unknown } | { ok: false; error?: string }>;
+      sheetsGetModifiedTime: (
+        sheetId: string
+      ) => Promise<
+        | { ok: boolean; modifiedTime: string | null; name: string | null }
+        | { ok: false; error?: string }
+      >;
+      sheetsClearRange: (
+        sheetId: string,
+        range?: string
+      ) => Promise<{ ok: boolean } | { ok: false; error?: string }>;
+      sheetsUpdateRange: (
+        sheetId: string,
+        range: string,
+        values: string[][]
+      ) => Promise<{ ok: boolean; updated?: number } | { ok: false; error?: string }>;
+      syncNow: () => Promise<
+        | { ok: boolean; action?: "pulled" | "pushed" | "no-change"; details?: string }
+        | { ok: false; error?: string }
+      >;
+      syncStatus: () => Promise<
+        | {
+            ok: boolean;
+            hasCredentials: boolean;
+            hasSheetId: boolean;
+            lastSyncTimestamp: string | null;
+            ready: boolean;
+          }
+        | { ok: false; error?: string }
+      >;
+      isDev?: boolean;
     };
   }
 }

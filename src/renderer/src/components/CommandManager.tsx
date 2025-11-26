@@ -4,6 +4,7 @@ import { AddCommandPage } from "../pages/AddCommandPage";
 import { Alert } from "./common/Alert";
 import { Confirm } from "./common/Confirm";
 import GoogleSyncModal from "./common/GoogleSyncModal";
+import { getKeyFromStorage, getSheetIdFromStorage } from "../utils/keytarStorage";
 import { useCommands } from "../hooks/useCommands";
 import { useSearch } from "../hooks/useSearch";
 import { useAlert } from "../hooks/useAlert";
@@ -26,7 +27,11 @@ export default function CommandManager(): React.JSX.Element {
   const { confirmMessage, showConfirm, showCustomConfirm, closeConfirm } = useConfirm();
   const { copiedId, copyToClipboard } = useCopyToClipboard();
   const [stayOnTop, setStayOnTop] = useState<boolean>(false);
+  const [googleSyncEnabled, setGoogleSyncEnabled] = useState<boolean>(false);
   const [showGoogleSync, setShowGoogleSync] = useState<boolean>(false);
+  const [googleKey, setGoogleKey] = useState<string | null>(null);
+  const [googleSheetId, setGoogleSheetId] = useState<string | null>(null);
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);
 
   // Keyboard ESC handler
   useEffect(() => {
@@ -74,6 +79,12 @@ export default function CommandManager(): React.JSX.Element {
       setEditing(updated);
       showCustomAlert("Updated!");
       await loadCommands();
+
+      // Trigger sync if enabled
+      if (googleSyncEnabled && window.api.syncNow) {
+        window.api.syncNow().catch((err) => console.error("Sync after update failed", err));
+      }
+
       return true;
     } else {
       await commandService.createCommand({
@@ -84,6 +95,12 @@ export default function CommandManager(): React.JSX.Element {
       showCustomAlert("Saved!");
       resetForm();
       await loadCommands();
+
+      // Trigger sync if enabled
+      if (googleSyncEnabled && window.api.syncNow) {
+        window.api.syncNow().catch((err) => console.error("Sync after create failed", err));
+      }
+
       return true;
     }
   };
@@ -106,6 +123,11 @@ export default function CommandManager(): React.JSX.Element {
         resetForm();
         setCurrentView("home");
       }
+
+      // Trigger sync if enabled
+      if (googleSyncEnabled && window.api.syncNow) {
+        window.api.syncNow().catch((err) => console.error("Sync after delete failed", err));
+      }
     });
   };
 
@@ -127,6 +149,11 @@ export default function CommandManager(): React.JSX.Element {
     } else {
       showCustomAlert(`Imported ${res.count ?? 0} commands`);
       await loadCommands();
+
+      // Trigger sync if enabled
+      if (googleSyncEnabled && window.api.syncNow) {
+        window.api.syncNow().catch((err) => console.error("Sync after import failed", err));
+      }
     }
   };
 
@@ -178,6 +205,30 @@ export default function CommandManager(): React.JSX.Element {
     });
   };
 
+  const handleDeleteAll = (): Promise<void> => {
+    return new Promise((resolve) => {
+      showCustomConfirm("Delete all commands?", async () => {
+        const res = await commandService.deleteAll();
+        if (!res || !res.ok) {
+          showCustomAlert(res?.message ?? "Delete all failed");
+          resolve();
+        } else {
+          showCustomAlert("All commands deleted");
+          await loadCommands();
+          resetForm();
+          setCurrentView("home");
+
+          // Trigger sync if enabled
+          if (googleSyncEnabled && window.api.syncNow) {
+            window.api.syncNow().catch((err) => console.error("Sync after delete all failed", err));
+          }
+
+          resolve();
+        }
+      });
+    });
+  };
+
   // Initialize stay-on-top state from main window when the component mounts
   useEffect(() => {
     const init = async (): Promise<void> => {
@@ -192,8 +243,133 @@ export default function CommandManager(): React.JSX.Element {
     init();
   }, []);
 
+  // Initialize Google Sync setting from settings store
+  useEffect(() => {
+    const initGoogleSync = async (): Promise<void> => {
+      try {
+        // @ts-ignore - preload exposes api
+        const res = await window.api?.settingsGet?.("googleSyncEnabled");
+        if (res && res.ok) setGoogleSyncEnabled(Boolean(res.value));
+      } catch {
+        // ignore
+      }
+    };
+    initGoogleSync();
+  }, []);
+
+  // Handler that intercepts attempts to toggle Google Sync so we can confirm / backup
+  const handleRequestSetGoogleSync = async (v: boolean): Promise<void> => {
+    // disable path: just update state and let effect persist it
+    if (!v) {
+      setGoogleSyncEnabled(false);
+      return;
+    }
+
+    // If enabling sync and credentials are missing, open the modal to configure them
+    if (!googleKey || !googleSheetId) {
+      // Open the Google Sync modal so user can configure credentials
+      setShowGoogleSync(true);
+      // Keep the toggle off for now; user will enable after setup
+      return;
+    }
+
+    // Both key and sheet ID are present, enable sync immediately
+    setGoogleSyncEnabled(true);
+  };
+
+  // Persist Google Sync setting changes when updated elsewhere in the app
+  useEffect(() => {
+    const persist = async (): Promise<void> => {
+      try {
+        // @ts-ignore - preload exposes api
+        await window.api?.settingsSet?.("googleSyncEnabled", googleSyncEnabled);
+      } catch {
+        // ignore
+      }
+    };
+    persist();
+  }, [googleSyncEnabled]);
+
+  // Load saved Google key + sheet ID at app start
+  const loadGoogleSavedData = async (): Promise<void> => {
+    try {
+      const existing = await getKeyFromStorage();
+      const existingSheet = await getSheetIdFromStorage();
+      if (existing) setGoogleKey(existing);
+      if (existingSheet) setGoogleSheetId(existingSheet);
+    } catch {
+      // ignore - already handled in util
+    }
+  };
+
+  useEffect(() => {
+    loadGoogleSavedData();
+  }, []);
+
+  // Initialize sync on mount and check sync status
+  useEffect(() => {
+    const initializeSync = async (): Promise<void> => {
+      try {
+        console.log("Sync initialization check:", {
+          googleSyncEnabled,
+          hasKey: !!googleKey,
+          hasSheetId: !!googleSheetId,
+          hasSyncAPI: typeof window.api.syncStatus === "function"
+        });
+
+        if (!window.api.syncStatus || !window.api.syncNow) {
+          console.log("Sync API not available");
+          return;
+        }
+
+        // Only sync if we have credentials
+        if (!googleKey || !googleSheetId) {
+          console.log("Skipping sync - no credentials yet");
+          return;
+        }
+
+        const status = await window.api.syncStatus();
+        console.log("Sync status:", JSON.stringify(status, null, 2));
+
+        if (status.ok && status.ready && googleSyncEnabled) {
+          // Perform initial sync
+          console.log("Performing initial sync...");
+          setIsSyncing(true);
+          const syncResult = await window.api.syncNow();
+          setIsSyncing(false);
+          console.log("Sync result:", syncResult);
+
+          // Reload commands after sync
+          if (syncResult.ok) {
+            await loadCommands();
+            // Spinner provides feedback, no need for alert on success
+          } else {
+            const errorMsg = "error" in syncResult ? syncResult.error : "Unknown error";
+            console.error("Sync failed:", errorMsg);
+            showCustomAlert(`Sync failed: ${errorMsg || "Unknown error"}`);
+          }
+        }
+      } catch (err) {
+        console.error("Sync initialization failed", err);
+      }
+    };
+
+    if (googleSyncEnabled) {
+      initializeSync();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [googleSyncEnabled, googleSheetId]);
+
   return (
     <div className="command-manager">
+      {isSyncing && (
+        <div className="sync-overlay">
+          <div className="sync-spinner">
+            <div className="spinner"></div>
+            <p>Syncing with Google Sheets...</p>
+          </div>
+        </div>
+      )}
       {currentView === "home" && (
         <HomePage
           search={search}
@@ -214,6 +390,9 @@ export default function CommandManager(): React.JSX.Element {
           onExport={handleExport}
           onImport={handleImport}
           onGoogleSync={() => setShowGoogleSync(true)}
+          onDeleteAll={handleDeleteAll}
+          googleSyncEnabled={googleSyncEnabled}
+          onSetGoogleSync={handleRequestSetGoogleSync}
           stayOnTop={stayOnTop}
           onSetStayOnTop={setStayOnTop}
         />
@@ -234,6 +413,8 @@ export default function CommandManager(): React.JSX.Element {
             // onFormCleared is called after form is cleared in AddCommandPage
           }}
           stayOnTop={stayOnTop}
+          googleSyncEnabled={googleSyncEnabled}
+          onSetGoogleSync={handleRequestSetGoogleSync}
           onSetStayOnTop={setStayOnTop}
           onGroupRename={handleRenameGroup}
           onGroupDelete={handleDeleteGroup}
@@ -247,7 +428,22 @@ export default function CommandManager(): React.JSX.Element {
         onConfirm={() => closeConfirm(true)}
         onCancel={() => closeConfirm(false)}
       />
-      <GoogleSyncModal show={showGoogleSync} onClose={() => setShowGoogleSync(false)} />
+      <GoogleSyncModal
+        show={showGoogleSync}
+        onClose={() => setShowGoogleSync(false)}
+        onSaved={async () => {
+          await loadGoogleSavedData();
+          // After loading credentials, enable sync
+          setGoogleSyncEnabled(true);
+        }}
+        onDeleted={() => {
+          loadGoogleSavedData();
+          setGoogleKey(null);
+          setGoogleSheetId(null);
+          setGoogleSyncEnabled(false);
+          showCustomAlert("Google Sync data deleted and sync disabled");
+        }}
+      />
     </div>
   );
 }

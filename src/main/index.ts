@@ -1,7 +1,11 @@
 import { app, shell, BrowserWindow, ipcMain, dialog, nativeImage } from "electron";
-import keytar from "keytar";
 import fs from "fs";
 import { join } from "path";
+import registerKeystoreHandlers from "./keystore";
+import registerSettingsHandlers from "./settings";
+import registerGoogleFileHandlers from "./google-file";
+import registerGoogleServiceHandlers from "./google-service";
+import registerSyncServiceHandlers from "./sync-service";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
 // Resolve the app icon path in a way that works both for development and for packaged builds.
 // - In development, we use the project's resources directory
@@ -169,6 +173,15 @@ app.whenReady().then(async () => {
         `
         ).run();
 
+        db.prepare(
+          `
+          CREATE TABLE IF NOT EXISTS sync_metadata (
+            key TEXT PRIMARY KEY,
+            value TEXT
+          )
+        `
+        ).run();
+
         ipcMain.handle(
           "db-create-command",
           (_, payload: { command: string; description?: string; groupName?: string }) => {
@@ -177,6 +190,14 @@ app.whenReady().then(async () => {
               .run(payload.command, payload.description || "", payload.groupName || "") as {
               lastInsertRowid?: number;
             };
+
+            // Force WAL checkpoint to update file mtime for sync detection
+            try {
+              db.pragma("wal_checkpoint(TRUNCATE)");
+            } catch (err) {
+              console.warn("WAL checkpoint after create failed", err);
+            }
+
             return db
               .prepare("SELECT * FROM commands WHERE id = ?")
               .get(info.lastInsertRowid as number);
@@ -192,12 +213,28 @@ app.whenReady().then(async () => {
             db.prepare(
               "UPDATE commands SET command = ?, description = ?, groupName = ? WHERE id = ?"
             ).run(payload.command, payload.description || "", payload.groupName || "", payload.id);
+
+            // Force WAL checkpoint to update file mtime for sync detection
+            try {
+              db.pragma("wal_checkpoint(TRUNCATE)");
+            } catch (err) {
+              console.warn("WAL checkpoint after update failed", err);
+            }
+
             return db.prepare("SELECT * FROM commands WHERE id = ?").get(payload.id);
           }
         );
 
         ipcMain.handle("db-delete-command", (_, id: number) => {
           db.prepare("DELETE FROM commands WHERE id = ?").run(id);
+
+          // Force WAL checkpoint to update file mtime for sync detection
+          try {
+            db.pragma("wal_checkpoint(TRUNCATE)");
+          } catch (err) {
+            console.warn("WAL checkpoint after delete failed", err);
+          }
+
           return { ok: true };
         });
 
@@ -242,6 +279,14 @@ app.whenReady().then(async () => {
               newName,
               oldName
             );
+
+            // Force WAL checkpoint to update file mtime for sync detection
+            try {
+              db.pragma("wal_checkpoint(TRUNCATE)");
+            } catch (err) {
+              console.warn("WAL checkpoint after rename-group failed", err);
+            }
+
             return { ok: true };
           } catch (err) {
             console.error("db-rename-group sqlite error", err);
@@ -257,10 +302,36 @@ app.whenReady().then(async () => {
               .get(groupName);
             if (!exists) return { ok: false, message: "Group not found" };
             db.prepare("DELETE FROM commands WHERE groupName = ?").run(groupName);
+
+            // Force WAL checkpoint to update file mtime for sync detection
+            try {
+              db.pragma("wal_checkpoint(TRUNCATE)");
+            } catch (err) {
+              console.warn("WAL checkpoint after delete-group failed", err);
+            }
+
             return { ok: true };
           } catch (err) {
             console.error("db-delete-group sqlite error", err);
             return { ok: false, message: "Failed to delete group" };
+          }
+        });
+
+        ipcMain.handle("db-delete-all", async () => {
+          try {
+            db.prepare("DELETE FROM commands").run();
+
+            // Force WAL checkpoint to ensure changes are written to the main DB file
+            try {
+              db.pragma("wal_checkpoint(TRUNCATE)");
+            } catch (err) {
+              console.warn("WAL checkpoint after delete-all failed", err);
+            }
+
+            return { ok: true };
+          } catch (err) {
+            console.error("db-delete-all sqlite error", err);
+            return { ok: false, message: "Failed to delete all commands" };
           }
         });
 
@@ -310,8 +381,86 @@ app.whenReady().then(async () => {
               insert.run(it.command, it.description || "", it.groupName || "");
           });
           insertMany(parsed);
+
+          // Force WAL checkpoint to ensure changes are written to the main DB file
+          // This updates the file modification time which is used for sync comparison
+          try {
+            db.pragma("wal_checkpoint(TRUNCATE)");
+          } catch (err) {
+            console.warn("WAL checkpoint after import failed", err);
+          }
+
           return { cancelled: false, count: parsed.length };
         });
+
+        // Sync metadata handlers
+        ipcMain.handle("sync-metadata-get", (_, key: string) => {
+          const row = db.prepare("SELECT value FROM sync_metadata WHERE key = ?").get(key) as
+            | { value: string }
+            | undefined;
+          return { ok: true, value: row?.value || null };
+        });
+
+        ipcMain.handle("sync-metadata-set", (_, key: string, value: string) => {
+          db.prepare(
+            "INSERT INTO sync_metadata (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value"
+          ).run(key, value);
+          return { ok: true };
+        });
+
+        ipcMain.handle("sync-metadata-delete", (_, key: string) => {
+          db.prepare("DELETE FROM sync_metadata WHERE key = ?").run(key);
+          return { ok: true };
+        });
+
+        // Create dbHandlers for sync service with direct DB access
+        const dbHandlers = {
+          getCommands: async () => {
+            return db.prepare("SELECT * FROM commands ORDER BY created_at DESC").all() as Array<{
+              id: number;
+              command: string;
+              description?: string;
+              groupName?: string;
+            }>;
+          },
+          deleteAllCommands: async () => {
+            db.prepare("DELETE FROM commands").run();
+          },
+          createCommand: async (payload: {
+            command: string;
+            description?: string;
+            groupName?: string;
+          }) => {
+            const info = db
+              .prepare("INSERT INTO commands (command, description, groupName) VALUES (?, ?, ?)")
+              .run(payload.command, payload.description || "", payload.groupName || "") as {
+              lastInsertRowid?: number;
+            };
+            return db
+              .prepare("SELECT * FROM commands WHERE id = ?")
+              .get(info.lastInsertRowid as number) as {
+              id: number;
+              command: string;
+              description?: string;
+              groupName?: string;
+            };
+          },
+          getMetadata: async (key: string) => {
+            const row = db.prepare("SELECT value FROM sync_metadata WHERE key = ?").get(key) as
+              | { value: string }
+              | undefined;
+            return row?.value || null;
+          },
+          setMetadata: async (key: string, value: string) => {
+            db.prepare(
+              "INSERT INTO sync_metadata (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value"
+            ).run(key, value);
+          },
+          getDbPath: () => dbPath
+        };
+
+        // Register sync service with SQLite handlers
+        registerSyncServiceHandlers(dbHandlers);
       } catch (err) {
         console.warn("Failed to initialize SQLite, falling back to JSON storage", err);
         useSqlite = false;
@@ -321,6 +470,10 @@ app.whenReady().then(async () => {
     // JSON fallback
     if (!useSqlite) {
       if (!fs.existsSync(jsonPath)) fs.writeFileSync(jsonPath, JSON.stringify([], null, 2), "utf8");
+
+      const metadataPath = join(dataPath, "sync_metadata.json");
+      if (!fs.existsSync(metadataPath))
+        fs.writeFileSync(metadataPath, JSON.stringify({}, null, 2), "utf8");
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const readAll = (): any[] => {
@@ -496,11 +649,104 @@ app.whenReady().then(async () => {
           return { ok: false, message: "Failed to delete group" };
         }
       });
+
+      ipcMain.handle("db-delete-all", async () => {
+        try {
+          writeAll([]);
+          return { ok: true };
+        } catch (err) {
+          console.error("db-delete-all json error", err);
+          return { ok: false, message: "Failed to delete all commands" };
+        }
+      });
+
+      // Sync metadata handlers for JSON fallback
+      const readMetadata = (): Record<string, string> => {
+        try {
+          const content = fs.readFileSync(metadataPath, "utf8");
+          return JSON.parse(content);
+        } catch {
+          return {};
+        }
+      };
+
+      const writeMetadata = (data: Record<string, string>): void =>
+        fs.writeFileSync(metadataPath, JSON.stringify(data, null, 2), "utf8");
+
+      ipcMain.handle("sync-metadata-get", (_, key: string) => {
+        const meta = readMetadata();
+        return { ok: true, value: meta[key] || null };
+      });
+
+      ipcMain.handle("sync-metadata-set", (_, key: string, value: string) => {
+        const meta = readMetadata();
+        meta[key] = value;
+        writeMetadata(meta);
+        return { ok: true };
+      });
+
+      ipcMain.handle("sync-metadata-delete", (_, key: string) => {
+        const meta = readMetadata();
+        delete meta[key];
+        writeMetadata(meta);
+        return { ok: true };
+      });
+
+      // Create dbHandlers for sync service with JSON fallback access
+      const dbHandlersJSON = {
+        getCommands: async () => {
+          return readAll() as Array<{
+            id: number;
+            command: string;
+            description?: string;
+            groupName?: string;
+          }>;
+        },
+        deleteAllCommands: async () => {
+          writeAll([]);
+        },
+        createCommand: async (payload: {
+          command: string;
+          description?: string;
+          groupName?: string;
+        }) => {
+          const rows = readAll();
+          const id = (rows.reduce((max, r) => (r.id && r.id > max ? r.id : max), 0) as number) + 1;
+          const newRow = {
+            id,
+            command: payload.command,
+            description: payload.description || "",
+            groupName: payload.groupName || "",
+            created_at: new Date().toISOString()
+          };
+          rows.unshift(newRow);
+          writeAll(rows);
+          return newRow;
+        },
+        getMetadata: async (key: string) => {
+          const meta = readMetadata();
+          return meta[key] || null;
+        },
+        setMetadata: async (key: string, value: string) => {
+          const meta = readMetadata();
+          meta[key] = value;
+          writeMetadata(meta);
+        },
+        getDbPath: () => jsonPath
+      };
+
+      // Register sync service with JSON handlers
+      registerSyncServiceHandlers(dbHandlersJSON);
     }
   } catch (err) {
     console.error("DB init error", err);
   }
 
+  // Register main process service handlers before creating window to ensure handlers exist
+  registerKeystoreHandlers();
+  registerSettingsHandlers();
+  registerGoogleFileHandlers();
+  registerGoogleServiceHandlers();
   createWindow();
 
   // Set macOS Dock icon explicitly when available
@@ -540,108 +786,7 @@ ipcMain.handle("get-always-on-top", () => {
   }
 });
 
-// Google Key handling (Load and Save) - registered globally so available regardless of DB backend
-ipcMain.handle("google-load-key", async () => {
-  const { canceled, filePaths } = await dialog.showOpenDialog({
-    title: "Load Google service account key",
-    filters: [{ name: "JSON", extensions: ["json"] }],
-    properties: ["openFile"]
-  });
-  if (canceled || !filePaths || filePaths.length === 0) return { canceled: true };
-  try {
-    const content = fs.readFileSync(filePaths[0], "utf8");
-    return { canceled: false, filePath: filePaths[0], content };
-  } catch (err) {
-    console.error("Failed to read Google key", err);
-    return { canceled: true };
-  }
-});
-
-ipcMain.handle("google-save-key", async (_, content: string) => {
-  const { canceled, filePath } = await dialog.showSaveDialog({
-    title: "Save Google service account key",
-    defaultPath: join(app.getPath("documents"), "service-account.json"),
-    filters: [{ name: "JSON", extensions: ["json"] }]
-  });
-  if (!filePath || canceled) return { ok: false };
-  try {
-    fs.writeFileSync(filePath, content, "utf8");
-    return { ok: true };
-  } catch (err) {
-    console.error("Failed to save Google key", err);
-    return { ok: false };
-  }
-});
-
-// Keystore persistence in app userData
-const KEYSTORE_FILENAME = "cmdforge-credentials.b64";
-const KEY_SERVICE = "CmdForge";
-const KEY_ACCOUNT = "google-service-account";
-const SHEET_ACCOUNT = "google-sheet-id";
-ipcMain.handle("keystore-save", async (_, base64: string) => {
-  try {
-    await keytar.setPassword(KEY_SERVICE, KEY_ACCOUNT, base64);
-    return { ok: true };
-  } catch (err) {
-    console.error("keystore-save error", err);
-    return { ok: false };
-  }
-});
-
-ipcMain.handle("keystore-load", async () => {
-  try {
-    const content = await keytar.getPassword(KEY_SERVICE, KEY_ACCOUNT);
-    if (!content) return { ok: false, content: null };
-    return { ok: true, content };
-  } catch (err) {
-    console.error("keystore-load error", err);
-    return { ok: false, content: null };
-  }
-});
-
-ipcMain.handle("keystore-delete", async () => {
-  try {
-    const ok = await keytar.deletePassword(KEY_SERVICE, KEY_ACCOUNT);
-    return { ok };
-  } catch (err) {
-    console.error("keystore-delete error", err);
-    return { ok: false };
-  }
-});
-
-// Sheet ID keystore handlers
-ipcMain.handle("keystore-save-sheet", async (_, sheetId: string) => {
-  try {
-    await keytar.setPassword(KEY_SERVICE, SHEET_ACCOUNT, sheetId);
-    return { ok: true };
-  } catch (err) {
-    console.error("keystore-save-sheet error", err);
-    return { ok: false };
-  }
-});
-ipcMain.handle("keystore-load-sheet", async () => {
-  try {
-    const content = await keytar.getPassword(KEY_SERVICE, SHEET_ACCOUNT);
-    if (!content) return { ok: false, content: null };
-    return { ok: true, content };
-  } catch (err) {
-    console.error("keystore-load-sheet error", err);
-    return { ok: false, content: null };
-  }
-});
-ipcMain.handle("keystore-delete-all", async () => {
-  try {
-    await keytar.deletePassword(KEY_SERVICE, KEY_ACCOUNT);
-    await keytar.deletePassword(KEY_SERVICE, SHEET_ACCOUNT);
-    // Also remove legacy file if present
-    const p = join(app.getPath("userData"), KEYSTORE_FILENAME);
-    if (fs.existsSync(p)) fs.unlinkSync(p);
-    return { ok: true };
-  } catch (err) {
-    console.error("keystore-delete-all error", err);
-    return { ok: false };
-  }
-});
+// NOTE: registration of these handlers happens above inside app.whenReady().
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
@@ -650,3 +795,8 @@ app.on("window-all-closed", () => {
 });
 
 // Custom main process code can be added here.
+
+// settings handlers are registered from the settings module
+/* settings handlers moved to src/main/settings.ts */
+
+// sheets-has-data handler moved to keystore module

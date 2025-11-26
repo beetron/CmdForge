@@ -13,6 +13,8 @@ interface AddCommandPageProps {
   onFormCleared?: () => void;
   stayOnTop: boolean;
   onSetStayOnTop: (v: boolean) => void;
+  googleSyncEnabled?: boolean;
+  onSetGoogleSync?: (v: boolean) => void;
   onGroupRename?: (oldName: string, newName: string) => Promise<void>;
   onGroupDelete?: (groupName: string) => Promise<void>;
 }
@@ -27,6 +29,8 @@ export const AddCommandPage: React.FC<AddCommandPageProps> = ({
   onFormCleared,
   stayOnTop,
   onSetStayOnTop,
+  googleSyncEnabled,
+  onSetGoogleSync,
   onGroupRename,
   onGroupDelete
 }) => {
@@ -101,6 +105,28 @@ export const AddCommandPage: React.FC<AddCommandPageProps> = ({
               CmdForge
             </h1>
             <div className="header-actions">
+              <div className="google-toggle">
+                <div
+                  className="google-help"
+                  role="button"
+                  title="Toggle to enable automatic Google Sync on startup"
+                  aria-label="Help: Google Sync"
+                >
+                  G <span className="tooltip">Toggle automatic Google Sync at startup</span>
+                </div>
+                <label className="switch">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(googleSyncEnabled)}
+                    onChange={(e) => {
+                      const v = e.target.checked;
+                      onSetGoogleSync?.(v);
+                    }}
+                    aria-label="Google Sync Enabled"
+                  />
+                  <span className="slider" />
+                </label>
+              </div>
               <div className="stay-toggle">
                 <div
                   className="stay-help"
