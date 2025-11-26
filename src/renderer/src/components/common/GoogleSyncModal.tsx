@@ -142,10 +142,13 @@ export const GoogleSyncModal: React.FC<GoogleSyncModalProps> = ({
           <p>Syncing requires a premade Google Sheet and a Google API Service Account key.</p>
           <br />
           <ol>
+            <li>Create new Project</li>
             <li>Create a Google API Service Account</li>
+            <li>Enable API: Google Sheets API, Google Drive API</li>
             <li>Download the Service Account key (JSON)</li>
             <li>Create a dedicated Google Sheet for CmdForge</li>
             <li>Share the Google Sheet with the service account email</li>
+            <li>Copy the Google Sheet ID</li>
           </ol>
         </div>
         {loadWarning && <div className="modal-warning">{loadWarning}</div>}

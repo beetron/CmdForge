@@ -3,7 +3,6 @@ import { google } from "googleapis";
 import type { JWT } from "google-auth-library";
 import keytar from "keytar";
 import { safeStorage } from "electron";
-import * as fs from "fs";
 
 const KEY_SERVICE = "CmdForge";
 const KEY_ACCOUNT = "google-service-account";
@@ -251,18 +250,21 @@ async function setLastSyncTimestamp(timestamp: string, dbHandlers: DbHandlers): 
   }
 }
 
-async function getLocalDbModifiedTime(dbHandlers: DbHandlers): Promise<Date | null> {
+async function getLocalDataModified(dbHandlers: DbHandlers): Promise<string | null> {
   try {
-    if (!dbHandlers.getDbPath) {
-      console.log("sync-service: getDbPath not available, cannot get DB modification time");
-      return null;
-    }
-    const dbPath = dbHandlers.getDbPath();
-    const stats = fs.statSync(dbPath);
-    return stats.mtime;
-  } catch (err) {
-    console.error("sync-service: failed to get DB modification time", err);
+    return await dbHandlers.getMetadata("local_data_modified");
+  } catch {
     return null;
+  }
+}
+
+async function setLocalDataModified(dbHandlers: DbHandlers): Promise<void> {
+  try {
+    const now = new Date().toISOString();
+    await dbHandlers.setMetadata("local_data_modified", now);
+    console.log(`sync-service: Updated local_data_modified to ${now}`);
+  } catch (err) {
+    console.error("sync-service: failed to set local data modified timestamp", err);
   }
 }
 
@@ -371,13 +373,13 @@ async function performSync(dbHandlers: DbHandlers): Promise<SyncResult> {
     // Subsequent syncs - use timestamp comparison
     if (new Date(cloudModified) <= new Date(lastSync)) {
       // Cloud is same or older than last sync
-      // Check if local DB was modified after last sync by comparing file modification time
-      const localDbMtime = await getLocalDbModifiedTime(dbHandlers);
+      // Check if local data was modified after last sync
+      const localDataModified = await getLocalDataModified(dbHandlers);
 
-      if (localDbMtime && localDbMtime > new Date(lastSync)) {
-        // Local DB was modified after last sync - push to cloud
+      if (localDataModified && new Date(localDataModified) > new Date(lastSync)) {
+        // Local data was modified after last sync - push to cloud
         console.log(
-          `performSync: Local DB modified (${localDbMtime.toISOString()}) after last sync (${lastSync}), pushing...`
+          `performSync: Local data modified (${localDataModified}) after last sync (${lastSync}), pushing...`
         );
 
         const pushResult = await pushToCloud(sheetId, auth, localCommands);
@@ -389,14 +391,14 @@ async function performSync(dbHandlers: DbHandlers): Promise<SyncResult> {
         const { modifiedTime: newCloudModified } = await getCloudModifiedTime(sheetId, auth);
         if (newCloudModified) await setLastSyncTimestamp(newCloudModified, dbHandlers);
 
-        console.log("performSync: Push complete (local DB was modified)");
+        console.log("performSync: Push complete (local data was modified)");
         return {
           ok: true,
           action: "pushed",
           details: `Pushed ${localCommands.length} commands (local changes detected)`
         };
       } else {
-        // Local DB not modified or can't determine - no changes
+        // Local data not modified - no changes
         console.log("performSync: No local changes detected, cloud unchanged");
         return { ok: true, action: "no-change", details: "No changes detected" };
       }
@@ -449,4 +451,5 @@ export function registerSyncServiceHandlers(dbHandlers: DbHandlers): void {
   });
 }
 
+export { setLocalDataModified };
 export default registerSyncServiceHandlers;

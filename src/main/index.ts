@@ -5,7 +5,7 @@ import registerKeystoreHandlers from "./keystore";
 import registerSettingsHandlers from "./settings";
 import registerGoogleFileHandlers from "./google-file";
 import registerGoogleServiceHandlers from "./google-service";
-import registerSyncServiceHandlers from "./sync-service";
+import registerSyncServiceHandlers, { setLocalDataModified } from "./sync-service";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
 // Resolve the app icon path in a way that works both for development and for packaged builds.
 // - In development, we use the project's resources directory
@@ -198,6 +198,11 @@ app.whenReady().then(async () => {
               console.warn("WAL checkpoint after create failed", err);
             }
 
+            // Update local data modified timestamp for sync
+            setLocalDataModified(dbHandlers).catch((err) =>
+              console.warn("Failed to update local_data_modified", err)
+            );
+
             return db
               .prepare("SELECT * FROM commands WHERE id = ?")
               .get(info.lastInsertRowid as number);
@@ -221,6 +226,11 @@ app.whenReady().then(async () => {
               console.warn("WAL checkpoint after update failed", err);
             }
 
+            // Update local data modified timestamp for sync
+            setLocalDataModified(dbHandlers).catch((err) =>
+              console.warn("Failed to update local_data_modified", err)
+            );
+
             return db.prepare("SELECT * FROM commands WHERE id = ?").get(payload.id);
           }
         );
@@ -234,6 +244,11 @@ app.whenReady().then(async () => {
           } catch (err) {
             console.warn("WAL checkpoint after delete failed", err);
           }
+
+          // Update local data modified timestamp for sync
+          setLocalDataModified(dbHandlers).catch((err) =>
+            console.warn("Failed to update local_data_modified", err)
+          );
 
           return { ok: true };
         });
@@ -287,6 +302,11 @@ app.whenReady().then(async () => {
               console.warn("WAL checkpoint after rename-group failed", err);
             }
 
+            // Update local data modified timestamp for sync
+            setLocalDataModified(dbHandlers).catch((err) =>
+              console.warn("Failed to update local_data_modified", err)
+            );
+
             return { ok: true };
           } catch (err) {
             console.error("db-rename-group sqlite error", err);
@@ -310,6 +330,11 @@ app.whenReady().then(async () => {
               console.warn("WAL checkpoint after delete-group failed", err);
             }
 
+            // Update local data modified timestamp for sync
+            setLocalDataModified(dbHandlers).catch((err) =>
+              console.warn("Failed to update local_data_modified", err)
+            );
+
             return { ok: true };
           } catch (err) {
             console.error("db-delete-group sqlite error", err);
@@ -327,6 +352,11 @@ app.whenReady().then(async () => {
             } catch (err) {
               console.warn("WAL checkpoint after delete-all failed", err);
             }
+
+            // Update local data modified timestamp for sync
+            setLocalDataModified(dbHandlers).catch((err) =>
+              console.warn("Failed to update local_data_modified", err)
+            );
 
             return { ok: true };
           } catch (err) {
@@ -389,6 +419,11 @@ app.whenReady().then(async () => {
           } catch (err) {
             console.warn("WAL checkpoint after import failed", err);
           }
+
+          // Update local data modified timestamp for sync
+          setLocalDataModified(dbHandlers).catch((err) =>
+            console.warn("Failed to update local_data_modified", err)
+          );
 
           return { cancelled: false, count: parsed.length };
         });
@@ -504,6 +539,12 @@ app.whenReady().then(async () => {
           };
           rows.unshift(newRow);
           writeAll(rows);
+
+          // Update local data modified timestamp for sync
+          setLocalDataModified(dbHandlersJSON).catch((err) =>
+            console.warn("Failed to update local_data_modified", err)
+          );
+
           return newRow;
         }
       );
@@ -521,6 +562,12 @@ app.whenReady().then(async () => {
             groupName: payload.groupName || ""
           };
           writeAll(rows);
+
+          // Update local data modified timestamp for sync
+          setLocalDataModified(dbHandlersJSON).catch((err) =>
+            console.warn("Failed to update local_data_modified", err)
+          );
+
           return rows[idx];
         }
       );
@@ -528,6 +575,12 @@ app.whenReady().then(async () => {
       ipcMain.handle("db-delete-command", (_, id: number) => {
         const rows = readAll().filter((r) => r.id !== id);
         writeAll(rows);
+
+        // Update local data modified timestamp for sync
+        setLocalDataModified(dbHandlersJSON).catch((err) =>
+          console.warn("Failed to update local_data_modified", err)
+        );
+
         return { ok: true };
       });
 
@@ -601,6 +654,12 @@ app.whenReady().then(async () => {
             created_at: new Date().toISOString()
           });
         writeAll(newRows);
+
+        // Update local data modified timestamp for sync
+        setLocalDataModified(dbHandlersJSON).catch((err) =>
+          console.warn("Failed to update local_data_modified", err)
+        );
+
         return { cancelled: false, count: parsed.length };
       });
 
@@ -624,6 +683,14 @@ app.whenReady().then(async () => {
             return r;
           });
           if (changed) writeAll(newRows);
+
+          // Update local data modified timestamp for sync
+          if (changed) {
+            setLocalDataModified(dbHandlersJSON).catch((err) =>
+              console.warn("Failed to update local_data_modified", err)
+            );
+          }
+
           return { ok: true };
         } catch (err) {
           console.error("db-rename-group json error", err);
@@ -643,6 +710,12 @@ app.whenReady().then(async () => {
             (r: unknown) => (r as { groupName?: string }).groupName !== groupName
           );
           writeAll(newRows);
+
+          // Update local data modified timestamp for sync
+          setLocalDataModified(dbHandlersJSON).catch((err) =>
+            console.warn("Failed to update local_data_modified", err)
+          );
+
           return { ok: true };
         } catch (err) {
           console.error("db-delete-group json error", err);
@@ -653,6 +726,12 @@ app.whenReady().then(async () => {
       ipcMain.handle("db-delete-all", async () => {
         try {
           writeAll([]);
+
+          // Update local data modified timestamp for sync
+          setLocalDataModified(dbHandlersJSON).catch((err) =>
+            console.warn("Failed to update local_data_modified", err)
+          );
+
           return { ok: true };
         } catch (err) {
           console.error("db-delete-all json error", err);

@@ -109,10 +109,10 @@ export const AddCommandPage: React.FC<AddCommandPageProps> = ({
                 <div
                   className="google-help"
                   role="button"
-                  title="Toggle to enable automatic Google Sync on startup"
+                  title="Google Sync"
                   aria-label="Help: Google Sync"
                 >
-                  G <span className="tooltip">Toggle automatic Google Sync at startup</span>
+                  G
                 </div>
                 <label className="switch">
                   <input
@@ -131,10 +131,10 @@ export const AddCommandPage: React.FC<AddCommandPageProps> = ({
                 <div
                   className="stay-help"
                   role="button"
-                  title="Toggle to have window stay on top"
+                  title="Window stay on top"
                   aria-label="Help: Stay on top"
                 >
-                  ? <span className="tooltip">Toggle to have window stay on top</span>
+                  ?
                 </div>
                 <label className="switch">
                   <input

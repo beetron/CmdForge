@@ -128,6 +128,13 @@ body {
   color: var(--ev-c-text-1);
 }
 
+.googleSheetTip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ev-c-text-1);
+}
+
 .google-help {
   position: relative;
   display: inline-flex;
@@ -199,6 +206,22 @@ body {
 .stay-help:hover .tooltip {
   display: block;
   transform: translateY(0);
+  opacity: 1;
+}
+
+/* Modal-specific tooltip positioning to prevent clipping */
+.modal-message .stay-help .tooltip {
+  right: auto;
+  left: 50%;
+  transform: translateX(-50%) translateY(-4px);
+  white-space: normal;
+  max-width: 400px;
+  word-break: break-all;
+}
+
+.modal-message .stay-help:hover .tooltip {
+  display: block;
+  transform: translateX(-50%) translateY(0);
   opacity: 1;
 }
 
@@ -1115,7 +1138,7 @@ button[disabled],
 }
 
 .modal-message {
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: var(--ev-c-text-1);
   margin-bottom: 24px;
   line-height: 1.6;

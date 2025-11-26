@@ -63,12 +63,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           </h1>
           <div className="header-actions">
             <div className="google-toggle">
-              <div
-                className="google-help"
-                role="button"
-                title="Toggle to enable automatic Google Sync on startup"
-                aria-label="Help: Google Sync"
-              >
+              <div className="google-help" role="button" aria-label="Help: Google Sync">
                 <svg
                   viewBox="0 0 24 24"
                   width="16"
@@ -97,13 +92,8 @@ export const HomePage: React.FC<HomePageProps> = ({
               </label>
             </div>
             <div className="stay-toggle">
-              <div
-                className="stay-help"
-                role="button"
-                title="Toggle to have window stay on top"
-                aria-label="Help: Stay on top"
-              >
-                ? <span className="tooltip">Window stay on top</span>
+              <div className="stay-help" role="button" aria-label="Help: Stay on top">
+                ?<span className="tooltip">Window stay on top</span>
               </div>
               <label className="switch">
                 <input
