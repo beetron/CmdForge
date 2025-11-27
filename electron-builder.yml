@@ -1,6 +1,7 @@
-appId: com.electron.app
+appId: com.cmdforge.app
 productName: cmdforge
 icon: build/icon
+copyright: "Copyright © 2025 Brian Imai"
 directories:
   buildResources: build
 files:
