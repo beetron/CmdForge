@@ -6,4 +6,5 @@ out
 *.log*
 .env
 package-mac-signed.sh
-certificate.p12
+certificate-application.p12
+certificate-installer.p12

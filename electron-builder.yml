@@ -22,8 +22,13 @@ nsis:
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
 mac:
-  target: default
-  arch: universal
+  # Use per-target arch configuration so we can build a single universal
+  # app bundle (contains both x64 and arm64 binaries) without using an
+  # invalid top-level `mac.arch` property.
+  target:
+    - target: default
+      arch:
+        - universal
   hardenedRuntime: true
   entitlements: build/entitlements.mac.plist
   entitlementsInherit: build/entitlements.mac.inherit.plist
@@ -32,7 +37,7 @@ mac:
     - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
     - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
-  notarize: false
+  notarize: true
   icon: build/icon.icns
 dmg:
   artifactName: ${name}-${version}.${ext}
