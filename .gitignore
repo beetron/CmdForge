@@ -4,3 +4,6 @@ out
 .DS_Store
 .eslintcache
 *.log*
+.env
+package-mac-signed.sh
+certificate.p12
