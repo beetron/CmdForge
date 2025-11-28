@@ -158,7 +158,7 @@ CmdForge は Google Sheets を使用してデバイス間でコマンドを同�
 #### 前提条件
 
 1. Google Cloud Platform アカウント
-2. Google Sheets API が有効化された Google Cloud プロジェクト
+2. Google Sheets API と Google Drive API が有効化された Google Cloud プロジェクト
 3. 適切な権限を持つサービスアカウント
 
 #### 設定手順
@@ -167,9 +167,10 @@ CmdForge は Google Sheets を使用してデバイス間でコマンドを同�
    - [Google Cloud Console](https://console.cloud.google.com/) にアクセス
    - 新しいプロジェクトを作成するか既存のプロジェクトを選択
 
-2. **Google Sheets API の有効化**:
+2. **Google Sheets API と Google Drive API の有効化**:
    - プロジェクト内で「API とサービス」>「ライブラリ」に移動
    - 「Google Sheets API」を検索して有効化
+   - 「Google Drive API」を検索して有効化
 
 3. **サービスアカウントの作成**:
    - 「API とサービス」>「認証情報」に移動
@@ -189,7 +190,7 @@ CmdForge は Google Sheets を使用してデバイス間でコマンドを同�
 
 6. **CmdForge の設定**:
    - CmdForge で **オプション** ボタン（⚙️）> **Google Sync** をクリック
-   - **「キーファイルを読み込み」** をクリックしてダウンロードした JSON ファイルを選択
+   - **「キーファイルを読み込み」** をクリックしてダウンロードした JSON ファイルを選択（必要に応じて `credentials.json` にリネーム）
    - Google Sheet ID を入力
    - **「設定を保存」** をクリック
 
