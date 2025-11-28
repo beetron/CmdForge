@@ -1,7 +1,7 @@
 {
   "app": {
     "title": "CmdForge",
-    "search": "コマンドを検索...",
+    "search": "コマンド検索... (* すべて表示)",
     "noResults": "コマンドが見つかりません",
     "confirmDelete": "このコマンドを削除してもよろしいですか？",
     "confirmDeleteGroup": "グループ「{{groupName}}」のすべてのコマンドを削除してもよろしいですか？",
