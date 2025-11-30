@@ -153,46 +153,10 @@ CmdForge はクロスデバイスアクセス用の Google Sheets とのクラ�
 
 ### Google Cloud 同期設定
 
+詳しい設定方法は
+[CmdForge website](https://cmdforge.btro.jp)
+
 CmdForge は Google Sheets を使用してデバイス間でコマンドを同期できます。この機能を使用するには独自の Google Cloud サービスアカウントを設定する必要があります。
-
-#### 前提条件
-
-1. Google Cloud Platform アカウント
-2. Google Sheets API と Google Drive API が有効化された Google Cloud プロジェクト
-3. 適切な権限を持つサービスアカウント
-
-#### 設定手順
-
-1. **Google Cloud プロジェクトの作成**:
-   - [Google Cloud Console](https://console.cloud.google.com/) にアクセス
-   - 新しいプロジェクトを作成するか既存のプロジェクトを選択
-
-2. **Google Sheets API と Google Drive API の有効化**:
-   - プロジェクト内で「API とサービス」>「ライブラリ」に移動
-   - 「Google Sheets API」を検索して有効化
-   - 「Google Drive API」を検索して有効化
-
-3. **サービスアカウントの作成**:
-   - 「API とサービス」>「認証情報」に移動
-   - 「認証情報を作成」>「サービスアカウント」をクリック
-   - 名前を付ける（例: "cmdforge-sync"）して作成
-   - サービスアカウントに Google Sheets の「編集者」ロールを付与
-
-4. **サービスアカウントキーの生成**:
-   - サービスアカウントの詳細で「キー」タブに移動
-   - 「キーを追加」>「新しいキーを作成」>「JSON」をクリック
-   - JSON キーファイルをダウンロード
-
-5. **Google スプレッドシートの作成**:
-   - [Google Sheets](https://sheets.google.com) にアクセス
-   - 新しいスプレッドシートを作成
-   - URL からスプレッドシート ID をコピー（`/d/` と `/edit` の間の長い文字列）
-
-6. **CmdForge の設定**:
-   - CmdForge で **オプション** ボタン（⚙️）> **Google Sync** をクリック
-   - **「キーファイルを読み込み」** をクリックしてダウンロードした JSON ファイルを選択（`credentials.json` にリネーム）
-   - Google Sheet ID を入力
-   - **「設定を保存」** をクリック
 
 #### 同期の仕組み
 

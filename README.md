@@ -155,46 +155,10 @@ Managing Groups:
 
 ### Google Cloud Sync Setup
 
+Detailed Setup guide at
+[CmdForge website](https://cmdforge.btro.jp)
+
 CmdForge supports syncing your commands across devices using Google Sheets. You'll need to set up your own Google Cloud service account for this feature.
-
-#### Prerequisites
-
-1. Google Cloud account
-2. Google Sheets API and Google Drive API enabled Google Cloud project
-3. A service account with appropriate permissions
-
-#### Setup Steps
-
-1. **Create a Google Cloud Project**:
-   - Go to the [Google Cloud Console](https://console.cloud.google.com/)
-   - Create a new project or select an existing one
-
-2. **Enable Google Sheets API and Google Drive API**:
-   - In your project, go to "APIs & Services" > "Library"
-   - Search for "Google Sheets API" and enable
-   - Search for "Google Drive API" and enable
-
-3. **Create a Service Account**:
-   - Go to "APIs & Services" > "Credentials"
-   - Click "Create Credentials" > "Service Account"
-   - Give it a Service account name (e.g., "cmdforge-sync") and create and continue
-   - Permissions; Grant the service account the "Editor" role and click Done
-
-4. **Generate Service Account Key**:
-   - In the service account details, go to the "Keys" tab
-   - Click "Add Key" > "Create new key" > "JSON"
-   - Download the JSON key file
-
-5. **Create a Google Sheet**:
-   - Go to [Google Sheets](https://sheets.google.com)
-   - Create a new spreadsheet
-   - Copy the spreadsheet ID from the URL (the long string between `/d/` and `/edit`)
-
-6. **Configure CmdForge**:
-   - In CmdForge, click the **Options** button (⚙️) > **Google Sync**
-   - Click **"Attach Key"** and select your downloaded JSON key file (rename to credentials.json)
-   - Enter your Google Sheet ID
-   - Click **"Save"**
 
 #### How Sync Works
 
